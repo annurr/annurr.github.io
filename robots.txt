@@ -1,0 +1,10 @@
+# Allow all web crawlers
+User-agent: *
+Allow: /
+
+# Block crawlers from admin panel
+User-agent: *
+Disallow: /admin.html
+
+# Sitemap location
+Sitemap: https://annurr.github.io/sitemap.xml

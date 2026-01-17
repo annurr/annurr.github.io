@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="images/logo.png" type="image/png">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <!-- DOMPurify for sanitizing HTML -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/blog-data.js"></script>
+    <style>
+        body {
+            background: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter',
+                sans-serif;
+            transition: background 0.3s ease,
+                color 0.3s ease;
+        }
+
+        /* Nav Link Button Styles */
+        .nav-links button {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 5px 10px;
+            transition: color 0.3s;
+        }
+
+        .nav-links button:hover,
+        .nav-links button.active {
+            color: var(--accent);
+        }
+
+        .nav-links .danger-btn {
+            color: #ef4444;
+        }
+
+        .nav-links .danger-btn:hover {
+            color: #ff6b6b;
+        }
+
+        /* Toggle Button - Removed absolute positioning to use header */
+        /* #theme-toggle styles are now handled by css/styles.css in the nav */
+
+        .admin-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 100px 20px 40px;
+            /* Added top padding for fixed header */
+        }
+
+        /* Login Form */
+        #login-view {
+            max-width: 400px;
+            margin: 10vh auto;
+            background: var(--bg-card);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        /* Dashboard */
+        #dashboard-view {
+            display: none;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .dashboard-header h2 {
+            margin: 0;
+            line-height: 1;
+        }
+
+        /* Dashboard Header Styling */
+        .dash-header {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+        }
+
+        .dash-header h2 {
+            margin: 0;
+            font-size: 1.15rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-main);
+        }
+
+        .dash-header h2 i {
+            color: var(--accent);
+            font-size: 1rem;
+        }
+
+        .dash-header h2::after {
+            display: none;
+        }
+
+        /* Post Thumbnail */
+        .post-thumb {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg-color);
+            flex-shrink: 0;
+        }
+
+        /* Actions Bar */
+        .actions-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .actions-bar h3 {
+            margin: 0;
+            font-size: 1rem;
+            color: var(--text-main);
+        }
+
+        .actions-bar h3::after {
+            display: none;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .dash-nav {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .dash-nav button {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-weight: 500;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .dash-nav button:hover,
+        .dash-nav button.active {
+            color: var(--accent);
+            background: rgba(6, 182, 212, 0.1);
+        }
+
+        .dash-nav .danger-btn {
+            color: #ef4444;
+        }
+
+        .dash-nav .danger-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Unified Action Button Styles */
+        .btn-action {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-action:hover {
+            background: rgba(6, 182, 212, 0.1);
+        }
+
+        .btn-action.primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-action.primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-action.danger {
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
+        .btn-action.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .btn-action.secondary {
+            border-color: var(--border);
+            color: var(--text-muted);
+        }
+
+        .btn-action.secondary:hover {
+            border-color: var(--text-main);
+            color: var(--text-main);
+        }
+
+        .btn-danger {
+            background: transparent;
+            color: #ef4444 !important;
+            border: 1px solid #ef4444;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            color: var(--text-main);
+            border-color: var(--text-main);
+        }
+
+        .btn-primary {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-primary:hover {
+            background: rgba(6, 182, 212, 0.1);
+        }
+
+        /* Editor Header */
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .editor-header h3 {
+            margin: 0;
+        }
+
+        .editor-header h3::after {
+            display: none;
+        }
+
+        /* Form Actions */
+        .form-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Tables */
+        .post-list {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .post-list th,
+        .post-list td {
+            text-align: left;
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .post-list tr:hover {
+            background: rgba(6, 182, 212, 0.05);
+        }
+
+        /* Actions */
+        .action-btn {
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1.1rem;
+            margin-right: 10px;
+        }
+
+        .edit-btn {
+            color: var(--accent);
+        }
+
+        .delete-btn {
+            color: #ef4444;
+        }
+
+        /* Forms */
+        #editor-view,
+        #admin-mgmt-view {
+            display: none;
+            margin-top: 20px;
+            max-width: 700px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            border-radius: 6px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .form-row>div {
+            flex: 1;
+        }
+
+        .alert {
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            display: none;
+            font-size: 0.9rem;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid #10b981;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <a href="admin.html" style="display: flex; align-items: center;">
+                        <img src="images/logo.png" alt="Annur" style="margin-right: 10px;">
+                        Admin Panel
+                    </a>
+                </div>
+                <div class="nav-links" id="admin-nav-links">
+                    <button onclick="showList()" id="btn-tab-posts" class="auth-link" aria-label="Posts"
+                        style="display: none;">Posts</button>
+
+                    <button onclick="showAuditLogs()" id="btn-tab-audit" class="auth-link" aria-label="Audit Logs"
+                        style="display: none;">Audit</button>
+                    <button onclick="showHomepageMgmt()" id="btn-tab-home" class="auth-link" aria-label="Homepage"
+                        style="display: none;">Homepage</button>
+                    <button onclick="handleLogout()" class="danger-btn auth-link" aria-label="Logout"
+                        style="display: none;"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                    <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Dark/Light Mode">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+                <div class="hamburger" onclick="toggleMobileMenu()">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <div class="admin-wrapper">
+        <!-- Old toggle removed from here -->
+
+        <!-- Login Section -->
+        <div id="login-view">
+            <h2 style="margin-bottom: 20px; color: var(--accent);">Admin Login</h2>
+            <div id="login-error" class="alert alert-error"></div>
+            <input type="text" id="username" placeholder="Username" onkeypress="handleLoginKey(event)">
+            <input type="password" id="password" placeholder="Password" onkeypress="handleLoginKey(event)">
+            <button onclick="handleLogin()" class="btn btn-primary" style="width: 100%;">Login</button>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard-view">
+
+
+            <div id="status-msg" class="alert alert-success"></div>
+
+            <!-- Confirm Modal -->
+            <div id="confirm-modal"
+                style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; justify-content:center; align-items:center;">
+                <div
+                    style="background:var(--bg-card); padding:30px; border-radius:12px; text-align:center; border:1px solid var(--border);">
+                    <p style="margin-bottom:20px;">Are you sure? This action cannot be undone.</p>
+                    <button id="confirm-yes" class="btn btn-primary"
+                        style="background:#ef4444; border-color:#ef4444;">Yes, Delete</button>
+                    <button onclick="document.getElementById('confirm-modal').style.display='none'"
+                        class="btn btn-outline" style="margin-left:10px;">Cancel</button>
+                </div>
+            </div>
+
+            <!-- Post List View -->
+            <!-- Post List View -->
+            <div class="dashboard-container">
+                <!-- Header removed, using global header -->
+                <div style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+                    <h2 onclick="showList()" id="dashboard-title-text"
+                        style="cursor: pointer; margin: 0; font-size: 1.5rem;"><i class="fas fa-th-large"></i> Blog
+                        Management</h2>
+                </div>
+
+                <!-- POSTS VIEW -->
+                <div id="list-view" class="view-section">
+                    <div class="actions-bar">
+                        <!-- Header moved to top level -->
+                        <button class="btn-primary" onclick="startNewPost()"><i class="fas fa-plus"></i> New
+                            Post</button>
+                    </div>
+                    <div class="post-list-container" id="post-list" style="margin-top:20px;">
+                        <!-- Posts injected here -->
+                    </div>
+                </div>
+
+                <!-- EDITOR VIEW -->
+                <div id="editor-view" class="view-section" style="display:none;">
+                    <!-- Editor content same as before -->
+                    <div class="editor-header">
+                        <h3>Post Editor</h3>
+                        <button onclick="showList()" class="btn-secondary">Cancel</button>
+                    </div>
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" id="post-title" placeholder="Enter post title">
+                    </div>
+                    <div class="form-group">
+                        <label>Excerpt (Short Description)</label>
+                        <textarea id="post-excerpt" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Content (HTML Supported - Sanitized)</label>
+                        <textarea id="post-content" rows="10"></textarea>
+                        <small>Basic HTML tags allowed. Scripts will be stripped.</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Image URL (Use 'images/filename.png' for local)</label>
+                        <input type="text" id="post-image" value="images/placeholder.svg">
+                        <div id="img-preview" style="margin-top:10px;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Tags (comma separated)</label>
+                        <input type="text" id="post-tags" placeholder="e.g. tech, news">
+                    </div>
+                    <div class="form-actions">
+                        <button onclick="savePost()" class="btn-primary">Save Post</button>
+                    </div>
+
+
+
+                </div>
+            </div>
+
+            <!-- AUDIT LOG VIEW -->
+            <div id="audit-log-view" class="view-section" style="display:none;">
+                <div class="actions-bar">
+                    <!-- Header moved to top level -->
+                    <div class="filters">
+                        <button onclick="renderAuditLogs()" class="btn-secondary">Refresh</button>
+                        <button onclick="clearAuditLogs(); renderAuditLogs();" class="btn-danger">Clear
+                            Logs</button>
+                    </div>
+                </div>
+                <div class="log-container"
+                    style="max-height: 500px; overflow-y: auto; font-family: monospace; background: #0f172a; padding: 15px; border-radius: 8px;">
+                    <table style="width:100%; font-size: 0.9em;">
+                        <thead>
+                            <tr style="text-align:left; color: var(--accent);">
+                                <th style="padding-bottom:10px;">Time</th>
+                                <th>Event</th>
+                                <th>Actor</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody id="audit-list-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- HOMEPAGE MANAGEMENT VIEW -->
+            <div id="homepage-mgmt-view" class="view-section" style="display:none;">
+                <p style="color:var(--text-muted); margin-bottom:20px;">Manage sections and content for the
+                    homepage. Changes are saved to local config.</p>
+
+                <div id="homepage-sections-list"></div>
+
+                <!-- Edit Section Modal -->
+                <div id="edit-section-modal"
+                    style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; justify-content:center; align-items:center;">
+                    <div
+                        style="background:var(--bg-card); padding:30px; border-radius:12px; width:90%; max-width:600px; max-height:90vh; overflow-y:auto; border:1px solid var(--border);">
+                        <h3 id="edit-section-title"
+                            style="margin-top:0; border-bottom:1px solid var(--border); padding-bottom:10px;">
+                            Edit Section</h3>
+                        <div id="edit-section-form"></div>
+                        <div class="form-actions" style="justify-content: flex-end;">
+                            <button onclick="closeEditSectionModal()" class="btn-secondary">Cancel</button>
+                            <button onclick="saveSectionChanges()" class="btn-primary">Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit Card Modal -->
+                <div id="edit-card-modal"
+                    style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; justify-content:center; align-items:center;">
+                    <div
+                        style="background:var(--bg-card); padding:30px; border-radius:12px; width:90%; max-width:600px; max-height:90vh; overflow-y:auto; border:1px solid var(--border);">
+                        <h3 id="edit-card-title"
+                            style="margin-top:0; border-bottom:1px solid var(--border); padding-bottom:10px;">
+                            Edit Card</h3>
+                        <div id="edit-card-form"></div>
+                        <div class="form-actions" style="justify-content: flex-end;">
+                            <button onclick="closeEditCardModal()" class="btn-secondary">Cancel</button>
+                            <button onclick="saveCardChanges()" class="btn-primary">Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- End Dashboard Container -->
+        </div>
+
+        <script src="js/blog-data.js"></script>
+        <script>
+            // --- State & Navigation ---
+            let currentUser = null;
+
+            // Initialize Admin
+            async function initAdmin() {
+                try {
+                    // Check for active session
+                    const session = await window.SupabaseClient.getSession();
+                    if (session) {
+                        currentUser = session.user.email;
+                        showDashboard();
+                    } else {
+                        document.getElementById('login-view').style.display = 'block';
+                        document.getElementById('dashboard-view').style.display = 'none';
+                    }
+                } catch (e) {
+                    console.error("Init Error:", e);
+                    // Ensure login view is shown if error
+                    document.getElementById('login-view').style.display = 'block';
+                }
+            }
+
+            // Run Init
+            document.addEventListener('DOMContentLoaded', initAdmin);
+
+            function handleLoginKey(e) {
+                if (e.key === 'Enter') handleLogin();
+            }
+
+            async function handleLogin() {
+                const user = document.getElementById('username').value.trim();
+                const pass = document.getElementById('password').value;
+                const errBox = document.getElementById('login-error');
+
+                errBox.style.display = 'none';
+
+                if (!user || !pass) {
+                    errBox.innerText = "Please enter both username and password.";
+                    errBox.style.display = 'block';
+                    return;
+                }
+
+                // Show Loading state if desired (optional)
+
+                const result = await window.SupabaseClient.login(user, pass);
+
+                if (result.success) {
+                    currentUser = result.user ? result.user.email : user;
+                    showDashboard();
+                } else {
+                    errBox.innerText = result.error || "Login failed.";
+                    errBox.style.display = 'block';
+                }
+            }
+
+            async function handleLogout() {
+                await window.SupabaseClient.logout();
+            }
+
+            function showDashboard() {
+                document.getElementById('login-view').style.display = 'none';
+                document.getElementById('dashboard-view').style.display = 'block';
+                // Show auth links
+                document.querySelectorAll('.auth-link').forEach(el => el.style.display = 'inline-block');
+                showList(); // Default to Post List
+            }
+
+            // --- Views ---
+            // --- Tab Manager ---
+            function setActiveTab(tabBtnId, viewId, title) {
+                // Hide all views
+                const views = ['list-view', 'editor-view', 'audit-log-view', 'homepage-mgmt-view'];
+                views.forEach(id => document.getElementById(id).style.display = 'none');
+
+                // Hide Modals/Forms
+                document.getElementById('confirm-modal').style.display = 'none';
+                document.getElementById('edit-section-modal').style.display = 'none';
+                document.getElementById('edit-card-modal').style.display = 'none';
+                document.getElementById('edit-card-modal').style.display = 'none';
+
+                // Reset Tab Buttons
+                const tabs = ['btn-tab-posts', 'btn-tab-audit', 'btn-tab-home'];
+                tabs.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.classList.remove('active');
+                });
+
+                // Activate requests
+                if (tabBtnId) document.getElementById(tabBtnId).classList.add('active');
+                if (viewId) document.getElementById(viewId).style.display = 'block';
+                if (title) document.getElementById('dashboard-title-text').innerHTML = title;
+            }
+
+            async function showList() {
+                setActiveTab('btn-tab-posts', 'list-view', '<i class="fas fa-th-large"></i> Blog Management');
+                await renderPostList();
+            }
+
+            function showEditor(post = null) {
+                // Editor is a sub-view of Blog Management effectively, or valid standalone.
+                // We treat it as a special view.
+                setActiveTab('btn-tab-posts', 'editor-view', '<i class="fas fa-edit"></i> Post Editor');
+
+                if (post) {
+                    document.getElementById('editor-title').innerText = 'Edit Post';
+                    document.getElementById('post-id').value = post.id;
+                    document.getElementById('post-title').value = post.title;
+                    document.getElementById('post-excerpt').value = post.excerpt || '';
+                    document.getElementById('post-content').value = post.content || '';
+                    document.getElementById('post-image').value = post.image || '';
+                    document.getElementById('post-tags').value = post.tags ? post.tags.join(', ') : '';
+                    updateImagePreview();
+                } else {
+                    // Reset form
+                    document.getElementById('editor-title').innerText = 'New Post';
+                    document.getElementById('post-id').value = '';
+                    document.getElementById('post-title').value = '';
+                    document.getElementById('post-excerpt').value = '';
+                    document.getElementById('post-content').value = '';
+                    document.getElementById('post-image').value = 'images/placeholder.svg';
+                    document.getElementById('post-tags').value = '';
+                    updateImagePreview();
+                }
+            }
+
+            async function showAuditLogs() {
+                setActiveTab('btn-tab-audit', 'audit-log-view', '<i class="fas fa-clipboard-list"></i> System Audit Logs');
+                await renderAuditLogs();
+            }
+
+
+
+            async function showHomepageMgmt() {
+                setActiveTab('btn-tab-home', 'homepage-mgmt-view', '<i class="fas fa-home"></i> Homepage Management');
+                await renderHomepageList();
+            }
+
+
+            // --- Homepage Logic ---
+            let currentHomeConfig = null;
+            let editingSectionId = null;
+            let editingCardId = null;
+            // --- Homepage Management ---
+            async function renderHomepageList() {
+                const list = document.getElementById('homepage-sections-list');
+                list.innerHTML = '<p class="loading-spinner">Loading configuration...</p>';
+
+                try {
+                    // Ensure we await the async function
+                    // Check availability
+                    if (typeof getHomepageConfig !== 'function') throw new Error("getHomepageConfig not found");
+
+                    currentHomeConfig = await getHomepageConfig();
+
+                    if (!currentHomeConfig || !currentHomeConfig.sections) {
+                        list.innerHTML = '<p style="color:red; padding:15px; border:1px solid red;">Failed to load configuration. Please check network/console.</p>';
+                        console.error("Config load failed or empty:", currentHomeConfig);
+                        return;
+                    }
+
+                    list.innerHTML = '';
+
+
+                    currentHomeConfig.sections.forEach((section, index) => {
+                        const div = document.createElement('div');
+                        div.className = 'admin-card';
+                        div.style.padding = '15px';
+                        div.style.marginBottom = '15px';
+                        div.style.background = 'var(--bg-card)';
+                        div.style.border = '1px solid var(--border)';
+
+                        div.innerHTML = `
+                            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:10px; margin-bottom:10px;">
+                                    <span style="font-weight:600; font-size:1.1rem; color:var(--text-main);">${DOMPurify.sanitize(section.name)}</span>
+                                    <span style="font-size:0.8rem; color:var(--text-muted); padding:2px 6px; border:1px solid var(--border); border-radius:4px;">${section.id}</span>
+                                </div>
+                                <div>
+                                    <button onclick="moveSection(${index}, -1)" class="btn-secondary" style="padding:4px 8px;"><i class="fas fa-arrow-up"></i></button>
+                                    <button onclick="moveSection(${index}, 1)" class="btn-secondary" style="padding:4px 8px;"><i class="fas fa-arrow-down"></i></button>
+                                    ${section.content ? `<button onclick="editSection('${section.id}')" class="btn-primary" style="padding:4px 12px; font-size:0.9rem;">Edit Content</button>` : ''}
+                                    ${section.type === 'list' ? `<button onclick="toggleSectionCards('${section.id}')" class="btn-primary" style="padding:4px 12px; font-size:0.9rem;">Manage Items</button>` : ''}
+                                </div>
+                            </div>
+                        `;
+
+                        // Card List (Collapsible)
+                        if (section.type === 'list') {
+                            const cardArea = document.createElement('div');
+                            cardArea.id = `cards-area-${section.id}`;
+                            cardArea.style.display = 'none'; // Hidden by default
+                            cardArea.style.padding = '15px';
+                            cardArea.style.background = 'var(--bg-color)';
+
+                            // Add New Card Button
+                            const addBtn = document.createElement('button');
+                            addBtn.className = 'btn-primary';
+                            addBtn.innerHTML = '<i class="fas fa-plus"></i> Add New Card';
+                            addBtn.style.marginBottom = '15px';
+                            addBtn.onclick = () => createNewCard(section.id);
+                            cardArea.appendChild(addBtn);
+
+                            if (section.items && section.items.length > 0) {
+                                section.items.forEach((item, cIndex) => {
+                                    const cardRow = document.createElement('div');
+                                    cardRow.style.display = 'flex';
+                                    cardRow.style.justifyContent = 'space-between';
+                                    cardRow.style.alignItems = 'center';
+                                    cardRow.style.padding = '10px';
+                                    cardRow.style.marginBottom = '5px';
+                                    cardRow.style.border = '1px solid var(--border)';
+                                    cardRow.style.borderRadius = '4px';
+                                    cardRow.style.background = 'var(--bg-card)';
+
+                                    // Display Logic
+                                    let label = item.title || item.company || item.category || 'Untitled Card';
+
+                                    cardRow.innerHTML = `
+                                        <span>${DOMPurify.sanitize(label)}</span>
+                                        <div style="display:flex; gap:5px;">
+                                            <button onclick="moveCard('${section.id}', ${cIndex}, -1)" class="btn-secondary" style="padding:2px 6px;"><i class="fas fa-arrow-up"></i></button>
+                                            <button onclick="moveCard('${section.id}', ${cIndex}, 1)" class="btn-secondary" style="padding:2px 6px;"><i class="fas fa-arrow-down"></i></button>
+                                            <button onclick="editCard('${section.id}', '${item.id}')" class="btn-secondary" style="color:var(--accent);"><i class="fas fa-edit"></i></button>
+                                            <button onclick="deleteCard('${section.id}', '${item.id}')" class="btn-danger" style="padding:2px 6px;"><i class="fas fa-trash"></i></button>
+                                        </div>
+                                    `;
+                                    cardArea.appendChild(cardRow);
+                                });
+                            } else {
+                                cardArea.innerHTML += '<p style="color:var(--text-muted);">No cards yet.</p>';
+                            }
+                            div.appendChild(cardArea);
+                        }
+
+                        list.appendChild(div);
+                    });
+
+                } catch (err) {
+                    console.error("Render Homepage Error:", err);
+                    list.innerHTML = '<p style="color:red; background:rgba(255,0,0,0.1); padding:10px;">Error rendering homepage editor: ' + err.message + '</p>';
+                }
+            }
+
+            function moveSection(index, direction) {
+                if (index + direction < 0 || index + direction >= currentHomeConfig.sections.length) return;
+                // Swap
+                const temp = currentHomeConfig.sections[index];
+                currentHomeConfig.sections[index] = currentHomeConfig.sections[index + direction];
+                currentHomeConfig.sections[index + direction] = temp;
+                saveHomepageConfig(currentHomeConfig, currentUser);
+                renderHomepageList();
+            }
+
+            function toggleSectionCards(sectionId) {
+                const el = document.getElementById(`cards-area-${sectionId}`);
+                if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+            }
+
+            // --- Edit Section Content ---
+            // --- Edit Section Content ---
+            function editSection(sectionId) {
+                editingSectionId = sectionId;
+                const section = currentHomeConfig.sections.find(s => s.id === sectionId);
+                if (!section || !section.content) return;
+
+                const form = document.getElementById('edit-section-form');
+                form.innerHTML = '';
+                document.getElementById('edit-section-title').innerText = `Edit: ${section.name}`;
+                document.getElementById('edit-section-modal').style.display = 'flex';
+
+                // Helper to create input
+                const createInput = (label, key, type = 'text', rows = 4) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'form-group';
+                    const lbl = document.createElement('label');
+                    lbl.innerText = label;
+                    wrapper.appendChild(lbl);
+
+                    let input;
+                    if (type === 'textarea') {
+                        input = document.createElement('textarea');
+                        input.rows = rows;
+                    } else {
+                        input = document.createElement('input');
+                        input.type = type;
+                    }
+                    // Handle potential undefined values gracefully
+                    input.value = section.content[key] || '';
+                    input.dataset.key = key;
+                    wrapper.appendChild(input);
+                    form.appendChild(wrapper);
+                };
+
+                // Form Layouts
+                if (sectionId === 'home') {
+                    createInput('Title (H1)', 'title');
+                    createInput('Subtitle', 'subtitle');
+                    createInput('Description', 'description', 'textarea');
+                    createInput('Primary CTA Text', 'ctaPrimary');
+                    createInput('Secondary CTA Text', 'ctaSecondary');
+                } else if (sectionId === 'about') {
+                    createInput('Title', 'title');
+                    createInput('Bio Paragraph 1', 'text1', 'textarea', 6);
+                    createInput('Bio Paragraph 2', 'text2', 'textarea', 6);
+
+                    const statsRow = document.createElement('div');
+                    statsRow.className = 'form-row';
+                    statsRow.innerHTML = `
+                            <div class="form-group" style="flex:1; margin-right:10px;">
+                                <label>Stat 1 Value</label>
+                                <input type="text" data-key="stat1Value" value="${section.content.stat1Value || ''}">
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label>Stat 1 Label</label>
+                                <input type="text" data-key="stat1Label" value="${section.content.stat1Label || ''}">
+                            </div>
+                        `;
+                    form.appendChild(statsRow);
+
+                    const statsRow2 = document.createElement('div');
+                    statsRow2.className = 'form-row';
+                    statsRow2.innerHTML = `
+                            <div class="form-group" style="flex:1; margin-right:10px;">
+                                <label>Stat 2 Value</label>
+                                <input type="text" data-key="stat2Value" value="${section.content.stat2Value || ''}">
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label>Stat 2 Label</label>
+                                <input type="text" data-key="stat2Label" value="${section.content.stat2Label || ''}">
+                            </div>
+                        `;
+                    form.appendChild(statsRow2);
+
+                } else if (sectionId === 'contact') {
+                    createInput('Title', 'title');
+                    createInput('Description', 'description', 'textarea');
+                    createInput('Location', 'location');
+                } else if (sectionId === 'blog-preview') {
+                    createInput('Title', 'title');
+                    createInput('Description', 'description', 'textarea');
+                } else {
+                    // Fallback Generic
+                    Object.keys(section.content).forEach(key => {
+                        createInput(key.replace(/([A-Z])/g, ' $1'), key);
+                    });
+                }
+            }
+
+            async function saveSectionChanges() { // Async
+                const section = currentHomeConfig.sections.find(s => s.id === editingSectionId);
+                if (!section) return;
+
+                const inputs = document.querySelectorAll('#edit-section-form [data-key]');
+                inputs.forEach(inp => {
+                    // Sanitize basic tags if needed or rely on trust + output encoding
+                    section.content[inp.dataset.key] = inp.value.trim();
+                });
+
+                await saveHomepageConfig(currentHomeConfig, currentUser); // Async
+                document.getElementById('edit-section-modal').style.display = 'none';
+                await renderHomepageList(); // Async
+            }
+
+            function closeEditSectionModal() {
+                document.getElementById('edit-section-modal').style.display = 'none';
+                editingSectionId = null;
+            }
+
+            // --- Card Logic ---
+            async function createNewCard(sectionId) { // Async
+                const section = currentHomeConfig.sections.find(s => s.id === sectionId);
+                // Template based on section
+                const newId = `card-${Date.now()}`;
+                let newCard = { id: newId };
+
+                if (sectionId === 'experience') {
+                    newCard = { ...newCard, company: 'New Company', role: 'Role', dateStart: 'JAN 2024', dateEnd: 'PRESENT', location: 'City', description: 'Description' };
+                } else if (sectionId === 'skills') {
+                    newCard = { ...newCard, category: 'New Category', tags: 'Tag1, Tag2' };
+                } else if (sectionId === 'education') {
+                    newCard = { ...newCard, company: 'School Name', role: 'Degree', dateStart: '2020', dateEnd: '2024', location: 'City' };
+                }
+
+                if (!section.items) section.items = [];
+                section.items.unshift(newCard); // Add to top
+                await saveHomepageConfig(currentHomeConfig, currentUser); // Async
+                await renderHomepageList();
+                setTimeout(() => toggleSectionCards(sectionId), 100);
+            }
+
+            async function moveCard(sectionId, index, direction) { // Async
+                const section = currentHomeConfig.sections.find(s => s.id === sectionId);
+                if (!section || !section.items) return;
+
+                if (index + direction < 0 || index + direction >= section.items.length) return;
+
+                // Swap
+                const temp = section.items[index];
+                section.items[index] = section.items[index + direction];
+                section.items[index + direction] = temp;
+                await saveHomepageConfig(currentHomeConfig, currentUser); // Async
+                await renderHomepageList();
+                setTimeout(() => toggleSectionCards(sectionId), 100);
+            }
+
+            async function deleteCard(sectionId, cardId) { // Async
+                if (!confirm("Delete this card?")) return;
+                const section = currentHomeConfig.sections.find(s => s.id === sectionId);
+                section.items = section.items.filter(i => i.id !== cardId);
+                await saveHomepageConfig(currentHomeConfig, currentUser); // Async
+                await renderHomepageList();
+                setTimeout(() => toggleSectionCards(sectionId), 100);
+            }
+
+            function editCard(sectionId, cardId) {
+                editingSectionId = sectionId; // Keep track of parent too
+                editingCardId = cardId;
+                const section = currentHomeConfig.sections.find(s => s.id === sectionId);
+                const card = section.items.find(i => i.id === cardId);
+
+                const form = document.getElementById('edit-card-form');
+                form.innerHTML = '';
+                document.getElementById('edit-card-title').innerText = `Edit Card`;
+                document.getElementById('edit-card-modal').style.display = 'flex';
+
+                // Generate Fields
+                Object.keys(card).forEach(key => {
+                    if (key === 'id') return; // Skip ID
+
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'form-group';
+                    const label = document.createElement('label');
+                    label.style.textTransform = 'capitalize';
+                    label.innerText = key.replace(/([A-Z])/g, ' $1');
+                    wrapper.appendChild(label);
+
+                    let input;
+                    // Description is likely HTML or long
+                    if (key === 'description' || card[key].length > 60) {
+                        input = document.createElement('textarea');
+                        input.rows = 4;
+                        input.value = card[key];
+                    } else {
+                        input = document.createElement('input');
+                        input.type = 'text';
+                        input.value = card[key];
+                    }
+                    input.dataset.key = key;
+                    wrapper.appendChild(input);
+                    form.appendChild(wrapper);
+                });
+            }
+
+            async function saveCardChanges() { // Async
+                const section = currentHomeConfig.sections.find(s => s.id === editingSectionId);
+                const cardIndex = section.items.findIndex(i => i.id === editingCardId);
+                if (cardIndex === -1) return;
+
+                const inputs = document.querySelectorAll('#edit-card-form [data-key]');
+                inputs.forEach(inp => {
+                    section.items[cardIndex][inp.dataset.key] = inp.value.trim();
+                });
+
+                await saveHomepageConfig(currentHomeConfig, currentUser); // Async
+                document.getElementById('edit-card-modal').style.display = 'none';
+                await renderHomepageList();
+                setTimeout(() => toggleSectionCards(editingSectionId), 100);
+            }
+
+            function closeEditCardModal() {
+                document.getElementById('edit-card-modal').style.display = 'none';
+                editingCardId = null;
+            }
+
+            // --- Post Management ---
+            async function renderPostList() {
+                const list = document.getElementById('post-list');
+                list.innerHTML = '<p>Loading posts...</p>';
+
+                try {
+                    let posts = await getBlogPosts(true);
+
+                    // Sanity check
+                    if (!posts || !Array.isArray(posts)) {
+                        posts = [];
+                    }
+
+                    list.innerHTML = '';
+
+                    if (posts.length === 0) {
+                        list.innerHTML = '<p style="text-align:center; padding:20px;">No posts found.</p>';
+                        return;
+                    }
+
+                    // Store for editing
+                    window.currentPostsCache = posts;
+
+                    posts.forEach(post => {
+                        const div = document.createElement('div');
+                        div.style.background = 'var(--bg-card)';
+                        div.style.border = '1px solid var(--border)';
+                        div.style.padding = '20px';
+                        div.style.marginBottom = '15px';
+                        div.style.borderRadius = '8px';
+                        div.style.display = 'flex';
+                        div.style.justifyContent = 'space-between';
+                        div.style.alignItems = 'center';
+                        div.style.boxShadow = 'var(--shadow)';
+
+                        if (post.deleted) div.style.opacity = '0.6';
+
+                        // Thumbnail
+                        const thumb = document.createElement('img');
+                        thumb.className = 'post-thumb';
+                        thumb.src = post.image || 'images/placeholder.svg';
+                        thumb.style.width = '60px'; // Ensure size
+                        thumb.style.height = '60px';
+                        thumb.style.objectFit = 'cover';
+                        thumb.style.borderRadius = '4px';
+                        thumb.onerror = function () { this.src = 'images/placeholder.svg'; };
+
+                        const left = document.createElement('div');
+                        left.style.display = 'flex';
+                        left.style.alignItems = 'center';
+                        left.style.gap = '15px';
+
+                        const textInfo = document.createElement('div');
+                        textInfo.innerHTML = `
+                                <h4 style="margin:0 0 5px 0; font-size:1.1rem; color:var(--text-main);">${DOMPurify.sanitize(post.title)} 
+                                    ${post.deleted ? '<span style="color:#ef4444; font-size:0.8em; margin-left:10px;">(DELETED)</span>' : ''}
+                                </h4>
+                                <div style="font-size:0.9rem; color:var(--text-muted);">${new Date(post.created_at || Date.now()).toLocaleDateString()} &mdash; ${post.tags ? post.tags.join(', ') : ''}</div>
+                            `;
+
+                        left.appendChild(thumb);
+                        left.appendChild(textInfo);
+
+                        const right = document.createElement('div');
+                        right.style.display = 'flex';
+                        right.style.gap = '10px';
+
+                        const editBtn = document.createElement('button');
+                        editBtn.innerText = 'Edit';
+                        editBtn.className = 'btn';
+                        editBtn.style.background = 'transparent';
+                        editBtn.style.color = 'var(--accent)';
+                        editBtn.style.border = '1px solid var(--accent)';
+                        editBtn.style.padding = '5px 15px';
+                        editBtn.style.cursor = 'pointer';
+                        editBtn.onclick = () => editPost(post.id);
+
+                        const delBtn = document.createElement('button');
+                        delBtn.innerText = post.deleted ? 'Restore' : 'Delete';
+                        delBtn.className = 'btn';
+                        delBtn.style.background = post.deleted ? '#10b981' : 'transparent';
+                        delBtn.style.color = post.deleted ? 'white' : '#ef4444';
+                        delBtn.style.border = `1px solid ${post.deleted ? '#10b981' : '#ef4444'}`;
+                        delBtn.style.padding = '5px 15px';
+                        delBtn.style.cursor = 'pointer';
+                        delBtn.onclick = () => {
+                            if (post.deleted) {
+                                alert('Post is already soft-deleted.');
+                            } else {
+                                handleDelete(post.id);
+                            }
+                        };
+
+                        right.appendChild(editBtn);
+                        right.appendChild(delBtn);
+
+                        div.appendChild(left);
+                        div.appendChild(right);
+                        list.appendChild(div);
+                    });
+
+                } catch (err) {
+                    console.error("Error rendering posts:", err);
+                    list.innerHTML = '<p style="color:red">Error loading posts.</p>';
+                }
+            }
+
+            let currentPostId = null;
+
+            function startNewPost() {
+                currentPostId = null;
+                document.getElementById('post-title').value = '';
+                document.getElementById('post-excerpt').value = '';
+                document.getElementById('post-content').value = '';
+                document.getElementById('post-image').value = 'images/placeholder.svg';
+                document.getElementById('post-tags').value = '';
+
+                document.getElementById('post-tags').value = '';
+
+                setActiveTab('btn-tab-posts', 'editor-view', '<i class="fas fa-edit"></i> New Post');
+            }
+
+            async function editPost(id) {
+                currentPostId = id;
+                const post = await getBlogPostById(id);
+                if (!post) return;
+
+                document.getElementById('post-title').value = post.title;
+                document.getElementById('post-excerpt').value = post.excerpt;
+                document.getElementById('post-content').value = post.content;
+                document.getElementById('post-image').value = post.image;
+                document.getElementById('post-tags').value = post.tags ? post.tags.join(', ') : '';
+
+                setActiveTab('btn-tab-posts', 'editor-view', '<i class="fas fa-edit"></i> Edit Post');
+            }
+
+            async function savePost() {
+                const title = document.getElementById('post-title').value;
+                const excerpt = document.getElementById('post-excerpt').value;
+                const content = document.getElementById('post-content').value;
+                const image = document.getElementById('post-image').value;
+                const tags = document.getElementById('post-tags').value.split(',').map(t => t.trim()).filter(t => t);
+
+                if (!title) return alert('Title required');
+
+                const post = {
+                    id: currentPostId || null, // Let DB generate ID if new
+                    title,
+                    excerpt,
+                    content,
+                    image,
+                    tags
+                };
+
+                try {
+                    await saveBlogPost(post); // Now tracks audit inside
+                    showList(); // This switches tabs, which triggers renderPostList if set up correctly, but let's be explicit
+                    // If showList just changes tab, we might need to manually refresh the list if we stay on list view
+                    // But showList() usually implies going back to list view. 
+                    // Let's check showList implementation... it sets active tab to 'post-list'.
+                    // We should re-fetch.
+                    await renderPostList();
+                } catch (err) {
+                    alert(err.message);
+                }
+            }
+
+            async function handleDelete(id) {
+                if (confirm('Are you sure? This will soft-delete the post.')) {
+                    await deleteBlogPost(id, currentUser);
+                    await renderPostList();
+                }
+            }
+
+            // --- Admin Management ---
+
+
+            // --- Audit Logs ---
+            async function renderAuditLogs() {
+                const tbody = document.getElementById('audit-list-body');
+                tbody.innerHTML = '<tr><td colspan="4">Loading logs...</td></tr>';
+
+                try {
+                    const logs = await getAuditLogs();
+                    tbody.innerHTML = '';
+
+                    if (logs.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px;">No audit logs found.</td></tr>';
+                        return;
+                    }
+
+                    logs.forEach(log => {
+                        const tr = document.createElement('tr');
+                        tr.style.borderBottom = '1px solid #1e293b';
+
+                        // Color code events
+                        let color = '#94a3b8';
+                        if (log.eventType && (log.eventType.includes('FAIL') || log.eventType.includes('DELETE') || log.eventType.includes('LOCK'))) color = '#ef4444';
+                        else if (log.eventType && (log.eventType.includes('SUCCESS') || log.eventType.includes('UNLOCK'))) color = '#10b981';
+                        else if (log.eventType && (log.eventType.includes('UPDATE') || log.eventType.includes('RESET'))) color = '#f59e0b';
+
+                        tr.innerHTML = `
+                                    <td style="padding:8px; width: 180px;">${new Date(log.created_at || log.timestamp).toLocaleString()}</td>
+                                    <td style="color:${color}; font-weight:bold;">${log.event_type || log.eventType}</td>
+                                    <td>${log.actor}</td>
+                                    <td>${log.description}</td>
+                                `;
+                        tbody.appendChild(tr);
+                    });
+                } catch (e) {
+                    console.error("Error rendering logs", e);
+                    tbody.innerHTML = '<tr><td colspan="4" style="color:#ef4444; padding:15px; font-weight:bold;">Error loading logs: ' + e.message + '</td></tr>';
+                }
+            }
+            function showSuccess(msg) {
+                const el = document.getElementById('status-msg');
+                el.innerText = msg;
+                el.style.display = 'block';
+                setTimeout(() => el.style.display = 'none', 3000);
+            }
+
+            // Theme Toggle Logic
+            function toggleTheme() {
+                const body = document.body;
+                const isDark = body.getAttribute('data-theme') !== 'light'; // Default is dark effectively by CSS logic
+                // Wait, styles.css has :root (dark) and [data-theme="light"]. 
+                // So if we set data-theme="light" it becomes light.
+
+                if (isDark) {
+                    body.setAttribute('data-theme', 'light');
+                    document.querySelector('#theme-toggle i').className = 'fas fa-sun';
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    body.removeAttribute('data-theme');
+                    document.querySelector('#theme-toggle i').className = 'fas fa-moon';
+                    localStorage.setItem('theme', 'dark');
+                }
+            }
+
+            // Mobile Menu Logic
+            function toggleMobileMenu() {
+                const hamburger = document.querySelector('.hamburger');
+                const navLinks = document.querySelector('.nav-links');
+                hamburger.classList.toggle('active');
+                navLinks.classList.toggle('active');
+            }
+
+            // Close mobile menu when a link is clicked
+            document.querySelectorAll('.nav-links button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelector('.hamburger').classList.remove('active');
+                    document.querySelector('.nav-links').classList.remove('active');
+                });
+            });
+
+            // --- Smart Header (Hide on Scroll Down, Show on Up) ---
+            let lastScrollY = window.scrollY;
+            const header = document.querySelector('header');
+
+            window.addEventListener('scroll', () => {
+                const currentScrollY = window.scrollY;
+
+                if (currentScrollY > lastScrollY && currentScrollY > 100) {
+                    header.classList.add('header-hidden');
+                } else {
+                    header.classList.remove('header-hidden');
+                }
+                lastScrollY = currentScrollY;
+            });
+
+            // Init Theme
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.setAttribute('data-theme', 'light');
+                document.getElementById('theme-toggle').innerHTML = '<i class="fas fa-sun"></i>';
+            }
+
+        </script>
+</body>
+
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Md Fahim Annur Rahman | Network Administrator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- Font Awesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="icon" href="images/logo.png" type="image/png">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
+</head>
+
+<body>
+  <header>
+    <div class="container">
+      <nav>
+        <div class="logo">
+          <a href="#home" style="display: flex; align-items: center;">
+            <img src="images/logo.png" alt="Annur">
+          </a>
+        </div>
+        <div class="nav-links">
+          <a href="#home">Home</a>
+          <a href="#about">About</a>
+          <a href="#experience">Experience</a>
+          <a href="#skills">Skills</a>
+          <a href="#education">Education</a>
+          <a href="blog.html">Blog</a>
+          <a href="#contact">Contact</a>
+          <button id="theme-toggle" aria-label="Toggle Dark Mode">
+            <i class="fas fa-moon"></i>
+          </button>
+        </div>
+        <div class="hamburger">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <section id="home" class="hero">
+    <div class="container hero-content">
+      <h1 id="hero-title">Loading...</h1>
+      <p class="hero-subtitle">Loading...</p>
+      <p class="hero-description">Loading...</p>
+
+      <!-- Headshot Container -->
+      <div class="hero-headshot-container"
+        style="margin: 30px auto; width: 250px; height: 250px; border-radius: 50%; overflow: hidden; border: 4px solid var(--accent); box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);">
+        <img src="images/headshot.jpg" alt="Profile Headshot"
+          style="width: 100%; height: 100%; object-fit: cover; display: block;">
+      </div>
+
+      <div class="hero-cta">
+        <a href="#contact" class="btn btn-primary">Contact Me</a>
+        <a href="#experience" class="btn btn-outline">View Experience</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="about" class="about">
+    <div class="container" style="position: relative;">
+      <div class="section-deco">
+        <div class="watermark">ABOUT</div>
+      </div>
+      <h2>About Me</h2>
+      <div class="about-grid">
+        <div class="about-text">
+          <p>Loading bio...</p>
+          <p></p> <!-- Placeholder for text2 -->
+          <div class="stats">
+            <div class="stat-item">
+              <h3>-</h3>
+              <p>Years Experience</p>
+            </div>
+            <div class="stat-item">
+              <h3>-</h3>
+              <p>Devices Managed</p>
+            </div>
+          </div>
+        </div>
+        <!-- Placeholder for Image or a Visual Element -->
+        <div class="about-visual" style="text-align: center;">
+          <div class="about-img-container"
+            style="width: 100%; max-width: 400px; margin: 0 auto; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); position: relative;">
+            <!-- Using working.jpg as placeholder -->
+            <img src="images/working.jpg" alt="Working Environment" style="width: 100%; height: auto; display: block;">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="experience" class="experience">
+    <div class="container" style="position: relative;">
+      <!-- Visual Deco -->
+      <div class="section-deco">
+        <div class="watermark">EXPERIENCE</div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+      </div>
+      <h2>Experience</h2>
+      <div class="rich-timeline clearfix">
+        <div class="timeline-spine"></div>
+        <!-- Items will be injected here -->
+      </div>
+    </div>
+  </section>
+
+  <section id="skills" class="skills">
+    <div class="container" style="position: relative;">
+      <div class="section-deco">
+        <div class="watermark">SKILLS</div>
+      </div>
+      <h2>Technical Skills</h2>
+      <div class="skills-grid">
+        <!-- Skills injected via JS -->
+      </div>
+
+      <h2 style="margin-top: 3rem;">Achievements</h2>
+      <div class="container" style="text-align: center; max-width: 800px; margin: 0 auto;">
+        <p
+          style="color: var(--text-primary); font-size: 1.1rem; border: 1px solid var(--accent); padding: 20px; border-radius: 8px;">
+          <i class="fas fa-trophy" style="color: var(--accent); margin-right: 10px;"></i>
+          At Grameenphone, updated the entire <strong>Huawei NCE Campus SDN OS</strong>, involving <strong>206 Access
+            Points</strong> and <strong>92 Access Switches</strong>, without any service impact.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="education" class="education">
+    <div class="container" style="position: relative;">
+      <!-- Visual Deco -->
+      <div class="section-deco">
+        <div class="watermark">EDUCATION</div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-3"></div>
+      </div>
+      <h2>Education</h2>
+      <div class="rich-timeline clearfix">
+        <div class="timeline-spine"></div>
+        <!-- Education Items injected via JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Blog Preview Section -->
+  <section id="blog-preview" class="blog-section">
+    <div class="container" style="position: relative;">
+      <div class="section-deco">
+        <div class="watermark">BLOG</div>
+      </div>
+      <h2>Networking Insights</h2>
+      <p style="text-align: center; max-width: 600px; margin: 0 auto 2rem;">
+        Explore articles on Cloud Security, SDN, and Network Administration.
+      </p>
+      <div id="home-blog-list" class="blog-preview-grid">
+        <!-- Blog items will be injected via JS -->
+      </div>
+      <div style="text-align: center; margin-top: 40px;">
+        <a href="blog.html" class="btn btn-outline">View All Posts</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact">
+    <div class="container" style="position: relative;">
+      <div class="section-deco">
+        <div class="watermark">CONTACT</div>
+      </div>
+      <h2>Get In Touch</h2>
+      <div class="contact-container">
+        <p>Loading...</p>
+        <div class="contact-links">
+          <div class="contact-item">
+            <a href="mailto:annurece@gmail.com" class="contact-icon"><i class="fas fa-envelope"></i></a>
+            <span>Email</span>
+          </div>
+          <div class="contact-item">
+            <a href="tel:+8801705827777" class="contact-icon"><i class="fas fa-phone"></i></a>
+            <span>Phone</span>
+          </div>
+          <div class="contact-item">
+            <a href="https://linkedin.com/in/annurr" target="_blank" class="contact-icon"><i
+                class="fab fa-linkedin"></i></a>
+            <span>LinkedIn</span>
+          </div>
+          <div class="contact-item">
+            <a href="https://github.com/annurr" target="_blank" class="contact-icon"><i class="fab fa-github"></i></a>
+            <span>GitHub</span>
+          </div>
+        </div>
+        <div style="margin-top: 2rem;">
+          <p><i class="fas fa-map-marker-alt" style="color: var(--accent);"></i> Loading...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <a href="assets/Annur_Resume.pdf" download class="btn-resume-highlight">
+          <i class="fas fa-file-arrow-down"></i> Download Resume
+        </a>
+        <p>&copy; 2026 Fahim Annur Rahman. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/supabase-client.js"></script>
+  <script src="js/blog-data.js"></script>
+  <script src="js/script.js"></script>
+  <script>
+    // Initialize Home Page Blog Preview
+    // Initialize Home Page Blog Preview
+    document.addEventListener('DOMContentLoaded', async () => {
+      const allPosts = await getBlogPosts();
+      const posts = allPosts.slice(0, 3);
+      const container = document.getElementById('home-blog-list');
+
+      if (!container) return; // Guard clause
+
+      posts.forEach(post => {
+        const card = document.createElement('div');
+        card.className = 'blog-card';
+        card.innerHTML = `
+                <img src="${post.image}" alt="${post.title}" class="blog-img" onerror="this.onerror=null; this.src='images/placeholder.svg';">
+                <div class="blog-content">
+                    <span class="blog-date">${post.date || new Date(post.created_at).toLocaleDateString()}</span>
+                    <h3 class="blog-title">${DOMPurify.sanitize(post.title)}</h3>
+                    <p class="blog-excerpt">${DOMPurify.sanitize(post.excerpt)}</p>
+                    <a href="blog.html" class="read-more">Read More <i class="fas fa-arrow-right"></i></a>
+                </div>
+            `;
+        container.appendChild(card);
+      });
+    });
+  </script>
+</body>
+
+</html>

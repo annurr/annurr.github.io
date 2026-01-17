@@ -1,0 +1,1349 @@
+:root {
+    /* Dark Theme (Default) */
+    --bg-color: #0b1120;
+    --bg-card: #1e293b;
+    --text-main: #f1f5f9;
+    --text-muted: #94a3b8;
+    --accent: #06b6d4;
+    /* Cyan 500 */
+    --accent-hover: #22d3ee;
+    /* Cyan 400 */
+    --border: #334155;
+    --nav-bg: rgba(11, 17, 32, 0.9);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+
+    --nav-height: 90px;
+}
+
+header {
+    transition: transform 0.3s ease;
+}
+
+.header-hidden {
+    transform: translateY(-100%);
+}
+
+.logo img {
+    height: 70px;
+    width: auto;
+    transition: height 0.3s ease;
+}
+
+[data-theme="light"] {
+    --bg-color: #f8fafc;
+    --bg-card: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --accent: #0891b2;
+    /* Cyan 600 - slightly darker for contrast */
+    --accent-hover: #06b6d4;
+    --border: #e2e8f0;
+    --nav-bg: rgba(255, 255, 255, 0.9);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* Fluid Typography */
+h1 {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 3rem;
+    position: relative;
+    z-index: 1;
+    /* Appear above watermark */
+}
+
+h2::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 4px;
+    background: var(--accent);
+    margin: 1rem auto 0;
+    border-radius: 2px;
+}
+
+h3 {
+    font-size: clamp(1.2rem, 2vw, 1.5rem);
+    font-weight: 600;
+    color: var(--accent);
+}
+
+p {
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    font-size: clamp(1rem, 1.2vw, 1.1rem);
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.3s ease;
+}
+
+ul {
+    list-style: none;
+}
+
+/* Utilities */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 clamp(20px, 5vw, 40px);
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 30px;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid var(--accent);
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+    /* Always white text on accent button for readability */
+}
+
+[data-theme="light"] .btn-primary {
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+    transform: translateY(-2px);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--accent);
+}
+
+.btn-outline:hover {
+    background: rgba(6, 182, 212, 0.1);
+    transform: translateY(-2px);
+}
+
+.btn-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.btn-download i {
+    transition: transform 0.3s ease;
+}
+
+.btn-download:hover i {
+    animation: downloadBounce 0.6s ease infinite;
+}
+
+@keyframes downloadBounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(3px);
+    }
+}
+
+/* Header & Nav */
+header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: var(--nav-bg);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    height: var(--nav-height);
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.nav-links {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+}
+
+.nav-links a {
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: var(--accent);
+}
+
+#theme-toggle {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 5px;
+    transition: transform 0.3s ease;
+}
+
+#theme-toggle:hover {
+    color: var(--accent);
+    transform: rotate(15deg);
+}
+
+.hamburger {
+    display: none;
+    cursor: pointer;
+}
+
+.bar {
+    display: block;
+    width: 25px;
+    height: 3px;
+    margin: 5px auto;
+    background-color: var(--text-main);
+    transition: all 0.3s ease-in-out;
+}
+
+/* Hero Section */
+.hero {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: var(--nav-height);
+    background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 60%);
+}
+
+.hero-content {
+    text-align: center;
+    max-width: 800px;
+    width: 100%;
+}
+
+.hero-subtitle {
+    font-size: clamp(1.1rem, 2vw, 1.3rem);
+    color: var(--accent);
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.hero-description {
+    font-size: clamp(1rem, 1.5vw, 1.15rem);
+    max-width: 600px;
+    margin: 0 auto 2.5rem;
+}
+
+.hero-cta {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Sections */
+section {
+    padding: clamp(40px, 8vw, 80px) 0;
+    /* Reduced spacing */
+}
+
+/* About Section */
+.about-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: clamp(30px, 5vw, 60px);
+    align-items: center;
+}
+
+.about-text .stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 2rem;
+}
+
+.stat-item h3 {
+    font-size: 2.5rem;
+    margin-bottom: 0.2rem;
+    color: var(--text-main);
+}
+
+.stat-item p {
+    font-size: 0.9rem;
+    margin: 0;
+    color: var(--accent);
+}
+
+/* Skills Section */
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.skill-card {
+    background: var(--bg-card);
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: var(--shadow);
+}
+
+.skill-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent);
+}
+
+.skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.skill-tag {
+    background: rgba(6, 182, 212, 0.1);
+    color: var(--accent);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Visual Enhancements */
+.section-deco {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.watermark {
+    position: absolute;
+    font-size: clamp(6rem, 15vw, 12rem);
+    /* Responsive sizing */
+    font-weight: 900;
+    color: var(--text-main);
+    opacity: 0.03;
+    /* Slightly more subtle */
+    top: -4rem;
+    /* Moved up to avoid card cutoff */
+    left: 50%;
+    transform: translateX(-50%);
+    /* Center horizontally */
+    white-space: nowrap;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.1;
+    z-index: 0;
+    background: var(--accent);
+}
+
+.orb-1 {
+    width: 300px;
+    height: 300px;
+    top: -50px;
+    right: 10%;
+    background: cyan;
+}
+
+.orb-2 {
+    width: 400px;
+    height: 400px;
+    bottom: -100px;
+    left: 5%;
+    background: blue;
+}
+
+.orb-3 {
+    width: 250px;
+    height: 250px;
+    top: 40%;
+    left: 20%;
+    background: purple;
+}
+
+/* Rich Timeline (Experience & Education) */
+.rich-timeline {
+    position: relative;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    z-index: 1;
+    /* Above deco */
+    /* Explicit gap between rows */
+}
+
+/* New Serpentine Layout */
+.timeline-spine {
+    display: none;
+    /* Removed central straight spine */
+}
+
+/* Responsive Spine Adjustment */
+@media (max-width: 768px) {
+    .timeline-spine {
+        left: 30px;
+    }
+}
+
+/* Zig-Zag 8-Col Grid */
+.timeline-card {
+    position: relative;
+    background: var(--bg-card);
+    border-radius: 12px;
+    width: 65%;
+    /* 8/12 Columns */
+    padding: 25px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease;
+    margin-bottom: 40px;
+    /* Vertical Gap */
+    z-index: 2;
+    /* Content above spine */
+    /* Handled by flex gap */
+}
+
+/* Pulsing Dots on Spine (Optional) - using pseudo elements on cards aligned to spine */
+.timeline-card::after {
+    content: '';
+    position: absolute;
+    top: 45px;
+    /* Align with icon center roughly (icon top 20 + half height 25 = 45) */
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--accent);
+    animation: pulse-dot 2s infinite;
+    z-index: 1;
+}
+
+@keyframes pulse-dot {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+
+    50% {
+        transform: scale(1.5);
+        opacity: 0.4;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+}
+
+/* Position dots on spine */
+.timeline-card:nth-child(odd)::after {
+    right: -43px;
+    /* Gap 40 + Spine offset ~width needs calc */
+    /* Spine is at 50% between items. Card is width 50%-40px. 
+       So gap is 40px. Spine is in middle of gap.
+       So dot needs to be at right: -40px (start of gap) - 0px (spine center)?
+       Actually, gap is 80px total?
+       .timeline-card width = 50% - 40px.
+       So Left card ends at 50% - 40px. Spine is at 50%.
+       Distance = 40px.
+       So dot needs `right: -41px` (accounting for dot width center).
+       Let's try -43px (40 + half dot approx).
+    */
+    right: -43px;
+}
+
+.timeline-card:nth-child(even)::after {
+    left: -43px;
+}
+
+/* Mobile Dot Adjustment */
+@media (max-width: 768px) {
+    .timeline-card::after {
+        left: -43px !important;
+        /* Relative to card left edge? */
+        /* On mobile, card is full width, spine is at left: 30px. 
+            Card padding-left: 70px.
+            So card content starts at 0.
+            Wait, card is `width: 100%`.
+            Spine is at absolute `left: 30px` of container.
+            Card is relative.
+            So dot needs to be at spine.
+            If card padding-left is 70px. Spine is inside that padding.
+            Card edge is at 0. Spine is at 30px.
+            So relative to card content box? No, relative to card border box.
+            Dot needs to be at left 30px.
+            `left: 30px` inside card?
+            The card has margin/padding.
+            Actually, let's just hide dots on mobile to keep it simple or align carefully.
+            Let's hide them on mobile to avoid clutter/misalignment.
+         */
+        display: none;
+    }
+}
+
+.timeline-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent);
+}
+
+.timeline-card:nth-child(odd) {
+    align-self: flex-start;
+    text-align: left;
+    /* Unified left alignment */
+    margin-right: auto;
+}
+
+.timeline-card:nth-child(even) {
+    align-self: flex-end;
+    text-align: left;
+    /* Unified left alignment */
+    margin-left: auto;
+}
+
+.timeline-icon {
+    position: absolute;
+    top: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 3px solid var(--accent);
+    color: var(--accent);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    z-index: 10;
+    box-shadow: 0 0 0 5px var(--bg-color);
+    /* fake border for spacing */
+}
+
+/* Positioning Icons */
+.timeline-card:nth-child(odd) .timeline-icon {
+    right: -65px;
+    /* 40px gap + 25px half icon width */
+}
+
+.timeline-card:nth-child(even) .timeline-icon {
+    left: -65px;
+}
+
+/* Arrows */
+.timeline-card::before {
+    content: '';
+    position: absolute;
+    top: 30px;
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+}
+
+/* Timeline Date Badge Styling */
+.timeline-date {
+    position: absolute;
+    top: 45px;
+    /* Align with icon center (20px top + 25px half height) */
+    transform: translateY(-50%);
+    width: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    z-index: 5;
+    line-height: 1;
+}
+
+.d-start,
+.d-end {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.d-month {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--accent);
+    text-transform: uppercase;
+}
+
+.d-year {
+    font-size: 0.75rem;
+    font-weight: 500;
+    opacity: 0.8;
+    color: var(--text-main);
+}
+
+.d-divider {
+    width: 20px;
+    height: 1px;
+    background: var(--accent);
+    margin: 6px 0;
+    opacity: 0.5;
+}
+
+.d-status {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-main);
+}
+
+/* Connector Line */
+.timeline-date::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    height: 1px;
+    background: var(--accent);
+    opacity: 0.4;
+    width: 15px;
+    /* Short connector */
+}
+
+/* Date Positioning Desktop */
+.timeline-card:nth-child(odd) .timeline-date {
+    right: -135px;
+    /* Offset to right of icon */
+}
+
+.timeline-card:nth-child(odd) .timeline-date::after {
+    right: 100%;
+    /* Line to left of badge */
+    margin-right: 5px;
+}
+
+.timeline-card:nth-child(even) .timeline-date {
+    left: -135px;
+    /* Offset to left of icon */
+}
+
+.timeline-card:nth-child(even) .timeline-date::after {
+    left: 100%;
+    /* Line to right of badge */
+    margin-left: 5px;
+}
+
+/* Card Logo Base */
+.card-logo {
+    position: absolute;
+    top: 20px;
+    font-size: 1.5rem;
+    opacity: 0.1;
+    /* Subtle watermark feel */
+    filter: grayscale(100%);
+    color: var(--text-main);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Timeline Card Content - Force Left Alignment */
+.timeline-content {
+    position: relative;
+    z-index: 1;
+    direction: ltr;
+    text-align: left !important;
+    /* Force override */
+}
+
+.timeline-content * {
+    text-align: left !important;
+    /* Force all children left */
+    direction: ltr !important;
+}
+
+.t-role,
+.t-meta,
+.timeline-content h3,
+.timeline-content p,
+.timeline-content ul,
+.timeline-content li {
+    text-align: left !important;
+    direction: ltr !important;
+}
+
+.timeline-content ul {
+    margin-left: 0;
+    padding-left: 25px;
+    /* Space for bullets */
+    list-style-type: disc;
+    list-style-position: outside;
+}
+
+.timeline-content li {
+    margin-left: 0;
+    padding-left: 0;
+}
+
+/* Desktop Logic (>1000px) */
+@media (min-width: 1001px) {
+
+    /* Odd Cards (Left 8 Cols) */
+    .timeline-card:nth-child(odd) {
+        align-self: flex-start;
+        margin-right: auto;
+        margin-left: 0;
+        text-align: left;
+    }
+
+    /* Even Cards (Right 8 Cols) */
+    .timeline-card:nth-child(even) {
+        align-self: flex-end;
+        margin-left: auto;
+        margin-right: 0;
+        text-align: left;
+    }
+
+    /* Connector / Snake Spine Logic */
+    /* Odd Card (Left): Connects from Bottom-Right */
+    .timeline-card:nth-child(odd)::after {
+        content: '';
+        position: absolute;
+        bottom: -40px;
+        /* Reach next card top */
+        right: 10%;
+        /* Anchor near right edge */
+        width: 2px;
+        height: 40px;
+        /* Vertical drop */
+        background: var(--accent);
+        z-index: -1;
+        /* To make it snaky, we need a curve. 
+           Let's use a border on a box instead of a simple line for S-shape later.
+           For now, a simple drop line to indicate flow visually? 
+           User wants "Serpentine". Let's try a distinct S-curve.
+        */
+        display: none;
+        /* Placeholder for step 2 */
+    }
+
+    /* Date Positioning: Inside the Spacer Area */
+    .timeline-card:nth-child(odd) .timeline-date {
+        right: -160px;
+        /* Push well into the right spacer */
+        left: auto;
+    }
+
+    .timeline-card:nth-child(even) .timeline-date {
+        left: -160px;
+        /* Push well into the left spacer */
+        right: auto;
+    }
+
+    /* Logos */
+    .timeline-card:nth-child(odd) .card-logo {
+        left: auto;
+        right: 20px;
+    }
+
+    .timeline-card:nth-child(even) .card-logo {
+        right: 20px;
+        left: auto;
+    }
+
+    /* Reposition Icons to Card Edge Center */
+    .timeline-card:nth-child(odd) .timeline-icon {
+        top: 50%;
+        right: -25px;
+        /* Centered on edge */
+        transform: translateY(-50%);
+    }
+
+    .timeline-card:nth-child(even) .timeline-icon {
+        top: 50%;
+        left: -25px;
+        /* Centered on edge */
+        transform: translateY(-50%);
+    }
+
+    /* Reposition Arrows */
+    .timeline-card::before {
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    /* Update Date Badge Vertical Center */
+    .timeline-date {
+        top: 50%;
+        /* Center relative to card height */
+        transform: translateY(-50%);
+    }
+
+    /* Padding for Bullets & Logo */
+    .timeline-content {
+        padding-left: 20px;
+        padding-right: 45px;
+    }
+}
+
+/* Ensure Lists are visible and properly aligned */
+.timeline-content {
+    direction: ltr;
+    /* Force left-to-right */
+}
+
+.timeline-content ul {
+    margin-left: 20px;
+    list-style-type: disc;
+    list-style-position: outside;
+    text-align: left;
+    direction: ltr;
+}
+
+.timeline-content li {
+    text-align: left;
+    direction: ltr;
+}
+
+.timeline-card:nth-child(odd)::before {
+    right: -10px;
+    border-left: 10px solid var(--border);
+}
+
+.timeline-card:nth-child(even)::before {
+    left: -10px;
+    border-right: 10px solid var(--border);
+}
+
+/* Adjust timeline date responsiveness */
+@media (max-width: 1000px) {
+
+    /* Switch to static date inside card for tablets and mobile */
+    .timeline-date {
+        position: static;
+        transform: none;
+        display: flex;
+        flex-direction: row;
+        /* Horizontal strip */
+        align-items: center;
+        width: auto;
+        margin-bottom: 10px;
+        text-align: left;
+    }
+
+    .d-start,
+    .d-end {
+        display: inline-flex;
+        flex-direction: row;
+        /* Horizontal for mobile */
+        align-items: center;
+    }
+
+    .d-month,
+    .d-year,
+    .d-status {
+        margin: 0;
+        font-size: 0.85rem;
+    }
+
+    .d-year {
+        margin-left: 4px;
+    }
+
+    /* Divider becomes vertical separator or hyphen? */
+    .d-divider {
+        width: 1px;
+        height: 12px;
+        margin: 0 8px;
+    }
+
+    .timeline-date::after {
+        display: none;
+        /* No connector on mobile */
+    }
+
+    /* Reset specific positioning overrides */
+    .timeline-card:nth-child(odd) .timeline-date,
+    .timeline-card:nth-child(even) .timeline-date {
+        right: auto;
+        left: auto;
+    }
+
+    /* Mobile Logo Logic: Always Top-Right */
+    .card-logo {
+        top: 15px;
+        right: 15px;
+        left: auto !important;
+        /* Force override desktop odd rule */
+        font-size: 1.2rem;
+    }
+
+    .timeline-content {
+        padding-right: 40px;
+        /* Space for logo on right */
+        padding-left: 0 !important;
+        /* Reset desktop odd rule */
+        text-align: left !important;
+        /* Everything left aligned on mobile */
+    }
+
+    .t-role {
+        padding-right: 0;
+        /* Let flow naturally */
+    }
+}
+
+.t-role {
+    font-size: 1.4rem;
+    margin-bottom: 5px;
+}
+
+.t-company {
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.t-meta {
+    display: flex;
+    gap: 15px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.t-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.t-desc ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.t-desc li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 8px;
+    color: var(--text-muted);
+    text-align: inherit;
+}
+
+.timeline-card:nth-child(odd) .t-desc li {
+    padding-left: 0;
+    padding-right: 20px;
+}
+
+.timeline-card:nth-child(odd) .t-desc li::before {
+    right: 0;
+    left: auto;
+}
+
+.t-desc li::before {
+    content: '▹';
+    color: var(--accent);
+    position: absolute;
+    left: 0;
+}
+
+.timeline-card:nth-child(odd) .t-meta {
+    justify-content: flex-end;
+}
+
+/* Mobile Timeline */
+@media (max-width: 768px) {
+    .rich-timeline::after {
+        left: 30px;
+    }
+
+    .timeline-card {
+        width: 100%;
+        align-self: stretch;
+        /* Full width */
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: 70px;
+        padding-right: 20px;
+        text-align: left;
+    }
+
+    .timeline-card:nth-child(odd),
+    .timeline-card:nth-child(even) {
+        text-align: left;
+        align-self: stretch;
+    }
+
+    .timeline-card .timeline-icon {
+        left: 5px;
+        right: auto;
+    }
+
+    .timeline-card:nth-child(odd) .timeline-icon,
+    .timeline-card:nth-child(even) .timeline-icon {
+        left: 5px;
+        right: auto;
+    }
+
+    .timeline-card::before {
+        left: 60px;
+        border-right: 10px solid var(--border);
+        border-left: none;
+    }
+
+    .timeline-card:nth-child(odd)::before {
+        left: 60px;
+        border-right: 10px solid var(--border);
+        border-left: none;
+    }
+
+    .timeline-card:nth-child(odd) .t-meta {
+        justify-content: flex-start;
+    }
+
+    .timeline-card:nth-child(odd) .t-desc li {
+        padding-left: 20px;
+        padding-right: 0;
+    }
+
+    .timeline-card:nth-child(odd) .t-desc li::before {
+        left: 0;
+        right: auto;
+    }
+
+}
+
+/* Blog Section (Preview) */
+.blog-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 2rem;
+}
+
+.blog-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.blog-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent);
+    box-shadow: var(--shadow);
+}
+
+.blog-img {
+    height: 180px;
+    width: 100%;
+    object-fit: cover;
+    background: #111;
+}
+
+.blog-content {
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.blog-date {
+    font-size: 0.8rem;
+    color: var(--accent);
+    margin-bottom: 8px;
+}
+
+.blog-title {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: var(--text-main);
+    line-height: 1.4;
+}
+
+.blog-excerpt {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    flex-grow: 1;
+}
+
+.read-more {
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.read-more:hover {
+    gap: 8px;
+}
+
+/* Clearfix for float timeline */
+.clearfix::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* Contact Section */
+.contact-container {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.contact-links {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: clamp(20px, 5vw, 60px);
+    margin-top: 3rem;
+}
+
+.contact-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    min-width: 100px;
+}
+
+.contact-icon {
+    font-size: 2.5rem;
+    color: var(--text-muted);
+    transition: all 0.3s ease;
+}
+
+.contact-item:hover .contact-icon {
+    color: var(--accent);
+    transform: scale(1.1);
+}
+
+.contact-item span {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--text-main);
+}
+
+
+/* Footer */
+footer {
+    background: var(--bg-card);
+    padding: 30px 0;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+}
+
+.footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.resume-tiny {
+    /* Legacy keeping just in case */
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
+/* New Highlighted Resume Button */
+.btn-resume-highlight {
+    font-size: 0.85rem;
+    color: white;
+    /* Strong contrast text */
+    background: linear-gradient(135deg, var(--accent) 0%, #3b82f6 100%);
+    /* Gradient */
+    padding: 8px 16px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Smooth bounce */
+    box-shadow: 0 4px 6px -1px rgba(6, 182, 212, 0.3);
+    /* Subtle Shadow */
+    text-decoration: none;
+    border: none;
+}
+
+.btn-resume-highlight:hover {
+    transform: scale(1.05);
+    /* Grow slightly */
+    box-shadow: 0 0 15px rgba(6, 182, 212, 0.6);
+    /* Glow effect */
+    color: white;
+}
+
+.btn-resume-highlight i {
+    font-size: 1rem;
+}
+
+
+/* Responsive Breakpoints */
+@media (min-width: 768px) {
+    .timeline::after {
+        left: 50%;
+        margin-left: -1px;
+    }
+
+    .timeline-item {
+        width: 50%;
+        padding-left: 0;
+        padding-right: 40px;
+        text-align: right;
+        left: 0;
+    }
+
+    .timeline-item:nth-child(even) {
+        left: 50%;
+        padding-left: 40px;
+        padding-right: 0;
+        text-align: left;
+    }
+
+    .timeline-item::before {
+        left: auto;
+        right: -6px;
+    }
+
+    .timeline-item:nth-child(even)::before {
+        left: -6px;
+    }
+
+    .timeline-item ul {
+        list-style-position: inside;
+    }
+
+    .timeline-item:nth-child(even) ul {
+        text-align: left;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-links {
+        position: fixed;
+        right: -100%;
+        top: var(--nav-height);
+        flex-direction: column;
+        background: var(--bg-card);
+        width: 100%;
+        height: calc(100vh - var(--nav-height));
+        padding: 40px;
+        transition: 0.3s ease-in-out;
+        border-top: 1px solid var(--border);
+        align-items: center;
+        justify-content: flex-start;
+        padding-top: 80px;
+    }
+
+    :root {
+        --nav-height: 70px;
+    }
+
+    .logo img {
+        height: 50px;
+    }
+
+    .nav-links.active {
+        right: 0;
+    }
+
+    .hamburger {
+        display: block;
+    }
+
+    .hamburger.active .bar:nth-child(2) {
+        opacity: 0;
+    }
+
+    .hamburger.active .bar:nth-child(1) {
+        transform: translateY(8px) rotate(45deg);
+    }
+
+    .hamburger.active .bar:nth-child(3) {
+        transform: translateY(-8px) rotate(-45deg);
+    }
+
+    .hero-cta {
+        flex-direction: column;
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .achievement-box {
+        padding: 20px;
+    }
+}
