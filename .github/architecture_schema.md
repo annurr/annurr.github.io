@@ -6,6 +6,8 @@ This project is a dynamic portfolio and blog management system designed to be li
 - **Frontend Hosting:** GitHub Pages
 - **Backend & Database:** Supabase (PostgreSQL)
 - **Frontend Stack:** Vanilla HTML, CSS, JavaScript (No heavy JS frameworks)
+- **External Libraries:** DOMPurify (Sanitization), Math.js (Calculator Computation)
+- **Public APIs:** Aladhan API (Prayer Time Fetching)
 
 ## 2. Architecture Diagram
 

@@ -12,77 +12,49 @@
     <link rel="icon" href="images/logo.png" type="image/png">
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
-        .tools-header {
-            padding-top: 120px;
-            padding-bottom: 60px;
-            text-align: center;
-            background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 60%);
-        }
-        /* Custom Tool Classes */
-        .tool-card {
-            background: var(--bg-card);
-            padding: 30px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            transition: all 0.3s ease;
-            box-shadow: var(--shadow);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 250px;
-            text-align: center;
-            cursor: pointer;
-        }
-        .tool-card:hover { transform: translateY(-5px); border-color: var(--accent); }
-        .tool-title { font-size: 1.25rem; font-weight: 600; color: var(--accent); margin-bottom: 15px; width: 100%; text-align: center;}
+        .tools-header { padding-top: 120px; padding-bottom: 60px; text-align: center; background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 60%); }
+        .tool-card { background: var(--bg-card); padding: 30px; border-radius: 12px; border: 1px solid var(--border); transition: all 0.3s ease; box-shadow: var(--shadow); position: relative; cursor: pointer; text-align: center; display: flex; flex-direction: column; justify-content: center; min-height: 250px; }
+        .tool-card:hover { border-color: var(--accent); box-shadow: 0 0 20px rgba(6, 182, 212, 0.2); transform: translateY(-5px); }
+        .tool-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 15px; color: var(--text-main); display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .tool-title i { color: var(--accent); }
         
-        /* Time tool */
-        .time-display { font-size: 2.5rem; font-weight: 700; color: var(--text-main); font-variant-numeric: tabular-nums; }
-        .time-zone-calc { display: none; margin-top: 20px; width: 100%; }
-        .tool-card.expanded { grid-column: 1 / -1; min-height: 400px; cursor: default; }
-        .tool-card.expanded .time-zone-calc { display: block; animation: fadeIn 0.5s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .tool-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 2000; justify-content: center; align-items: flex-start; overflow-y: auto; padding: 20px; backdrop-filter: blur(5px); }
+        .tool-modal-content { background: var(--bg-card); width: 90%; max-width: 500px; padding: 30px; border-radius: 12px; border: 1px solid var(--border); position: relative; text-align: center; box-shadow: var(--shadow); margin-top: 50px; margin-bottom: 50px; }
+        .close-tool-modal { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; transition: color 0.3s ease; }
+        .close-tool-modal:hover { color: var(--accent); }
 
-        /* Generic Inputs */
-        .tool-input { width: 100%; padding: 12px; margin-bottom: 15px; background: var(--bg-color); border: 1px solid var(--border); color: var(--text-main); border-radius: 6px; }
-        
-        /* Calc UI */
-        .calc-display { font-size: 2rem; background: var(--bg-color); border-radius: 6px; padding: 10px; width:100%; text-align: right; margin-bottom: 15px; font-family: monospace; }
-        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; }
-        .calc-btn { background: var(--bg-color); border: 1px solid var(--border); color: var(--text-main); padding: 15px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
-        .calc-btn:hover { background: var(--border); }
-        .calc-btn.op { color: var(--accent); }
-        .sci-mode { display: none; }
-        .tool-card.expanded .sci-mode { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px; width: 100%; animation: fadeIn 0.5s ease; }
-
-        /* Premium Section */
-        .premium-container { position: relative; width: 100%; border-radius: 12px; overflow: hidden; margin-top: 40px; padding: 40px 0; border: 1px solid var(--border); background: var(--bg-card); }
-        .premium-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(11, 17, 32, 0.4); backdrop-filter: blur(12px); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; transition: opacity 0.5s ease; }
-        [data-theme="light"] .premium-overlay { background: rgba(255, 255, 255, 0.4); }
-        .premium-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; opacity: 0.5; pointer-events: none; padding: 0 clamp(20px, 5vw, 40px); }
-        
         .auth-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 2000; justify-content: center; align-items: center; }
         .auth-modal-content { background: var(--bg-card); width: 100%; max-width: 400px; padding: 40px; border-radius: 12px; border: 1px solid var(--border); position: relative; text-align: center; box-shadow: var(--shadow); }
+
+        .premium-container { position: relative; width: 100%; overflow: hidden; border-radius: 12px; }
+        .premium-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(10, 10, 10, 0.4); backdrop-filter: blur(12px); border-radius: 12px; transition: opacity 0.5s ease; border: 1px solid var(--border); }
+        .premium-content { opacity: 0.3; pointer-events: none; transition: opacity 0.5s ease; }
+
+        .tool-input { width: 100%; padding: 12px 15px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); font-size: 1rem; margin-bottom: 15px; transition: border-color 0.3s ease; outline: none; }
+        .tool-input:focus { border-color: var(--accent); }
+        
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
+        .calc-btn { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 15px; font-size: 1.2rem; color: var(--text-main); cursor: pointer; transition: all 0.2s; }
+        .calc-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--accent); }
+        .calc-btn.op { color: var(--accent); font-weight: 600; }
+        .calc-display { width: 100%; background: var(--bg-color); border: 1px solid var(--border); border-radius: 8px; padding: 15px; font-size: 2rem; color: var(--text-main); text-align: right; font-family: monospace; outline: none; }
+        .sci-mode { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-top: 10px; }
     </style>
 </head>
-<body>
+<body class="dark-theme">
     <header>
         <div class="container">
-            <nav>
-                <div class="logo">
-                    <a href="index.html#home" style="display: flex; align-items: center;">
-                        <img src="images/logo.png" alt="Annur">
-                    </a>
-                </div>
+            <nav class="navbar" id="navbar">
+                <a href="index.html" class="logo">
+                    <img src="images/logo.png" alt="Logo" class="nav-logo-img">
+                    Md Fahim Annur Rahman
+                </a>
                 <div class="nav-links">
-                    <a href="index.html#home">Home</a>
-                    <a href="index.html#experience">Experience</a>
+                    <a href="index.html">Home</a>
                     <a href="blog.html">Blog</a>
                     <a href="tools.html" class="active">Tools</a>
-                    <button id="theme-toggle" aria-label="Toggle Dark Mode"><i class="fas fa-moon"></i></button>
+                    <a href="admin.html">Admin</a>
+                    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle Theme"><i class="fas fa-sun"></i></button>
                 </div>
                 <div class="hamburger">
                     <span class="bar"></span><span class="bar"></span><span class="bar"></span>
@@ -90,77 +62,59 @@
             </nav>
         </div>
     </header>
+    <div class="mobile-menu">
+        <a href="index.html">Home</a>
+        <a href="blog.html">Blog</a>
+        <a href="tools.html" class="active">Tools</a>
+        <a href="admin.html">Admin</a>
+        <button class="theme-toggle" id="mobile-theme-toggle" aria-label="Toggle Theme" style="margin-top:20px;"><i class="fas fa-sun"></i> Toggle Theme</button>
+    </div>
 
     <div class="tools-header">
         <div class="container">
-            <h1>Toolkit</h1>
-            <p style="color: var(--text-muted);">A collection of public utilities and premium networking tools.</p>
+            <h1 style="font-size: 2.5rem; margin-bottom: 15px;">Developer Utilities</h1>
+            <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">A suite of client-side tools and calculators ported natively into the browser.</p>
         </div>
     </div>
 
     <section class="container" style="padding-bottom: 40px;">
-        <h2>General Tools</h2>
-        <div class="skills-grid" id="general-tools-grid">
+        <div class="skills-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
             
-            <!-- Box 1: World Clock -->
-            <div class="tool-card" id="tool-clock" onclick="expandTool(this, 'clock')">
-                <div class="tool-title"><i class="fas fa-globe"></i> World Clock</div>
-                <div class="time-display" id="local-time">00:00:00</div>
-                <p style="margin-top:5px; color: var(--text-muted);">Local Time</p>
-                
-                <div class="time-zone-calc" onclick="event.stopPropagation()">
-                    <hr style="border-color: var(--border); margin: 20px 0;">
-                    <h3 style="margin-bottom:15px; font-size: 1.1rem; color: var(--text-main);">Time Zone Converter</h3>
-                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                        <input type="number" id="tz-offset" class="tool-input" placeholder="Enter UTC Offset (e.g. -5, 8)" style="margin-bottom:0;">
-                        <button class="btn btn-primary" onclick="calculateTimezone()">Convert</button>
-                    </div>
-                    <div class="time-display" id="tz-result" style="font-size: 2rem; color: var(--accent);">--:--:--</div>
-                </div>
-                <button class="btn btn-outline" style="margin-top: 15px; position:absolute; top:10px; right:10px; padding: 5px 10px; display:none;" id="close-clock" onclick="event.stopPropagation(); collapseTool('tool-clock')"><i class="fas fa-times"></i></button>
+            <div class="tool-card" onclick="openToolModal('clock-modal')">
+                <div class="tool-title"><i class="fas fa-clock"></i> World Clock & Focus</div>
+                <div id="digital-time-preview" style="font-size: 2.5rem; color: var(--accent); font-variant-numeric: tabular-nums; margin: 15px 0;">--:--:--</div>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Click to open converter</p>
             </div>
 
-            <!-- Box 2: Smart Calculator -->
-            <div class="tool-card" id="tool-calc" onclick="expandTool(this, 'calc')">
-                <div class="tool-title"><i class="fas fa-calculator"></i> Smart Calculator</div>
-                
-                <div class="calc-display" id="calc-display">0</div>
-                
-                <div class="sci-mode" onclick="event.stopPropagation()">
-                    <button class="calc-btn op" onclick="calcAction('sin')">sin</button>
-                    <button class="calc-btn op" onclick="calcAction('cos')">cos</button>
-                    <button class="calc-btn op" onclick="calcAction('tan')">tan</button>
-                    <button class="calc-btn op" onclick="calcAction('log')">log</button>
-                </div>
-                
-                <div class="calc-grid" onclick="event.stopPropagation()">
-                    <button class="calc-btn" onclick="calcAppend('7')">7</button>
-                    <button class="calc-btn" onclick="calcAppend('8')">8</button>
-                    <button class="calc-btn" onclick="calcAppend('9')">9</button>
-                    <button class="calc-btn op" onclick="calcAction('/')">/</button>
-                    
-                    <button class="calc-btn" onclick="calcAppend('4')">4</button>
-                    <button class="calc-btn" onclick="calcAppend('5')">5</button>
-                    <button class="calc-btn" onclick="calcAppend('6')">6</button>
-                    <button class="calc-btn op" onclick="calcAction('*')">×</button>
-                    
-                    <button class="calc-btn" onclick="calcAppend('1')">1</button>
-                    <button class="calc-btn" onclick="calcAppend('2')">2</button>
-                    <button class="calc-btn" onclick="calcAppend('3')">3</button>
-                    <button class="calc-btn op" onclick="calcAction('-')">-</button>
-                    
-                    <button class="calc-btn" onclick="calcAction('clear')">C</button>
-                    <button class="calc-btn" onclick="calcAppend('0')">0</button>
-                    <button class="calc-btn op" onclick="calcEvaluate()">=</button>
-                    <button class="calc-btn op" onclick="calcAction('+')">+</button>
-                </div>
-                <button class="btn btn-outline" style="margin-top: 15px; position:absolute; top:10px; right:10px; padding: 5px 10px; display:none;" id="close-calc" onclick="event.stopPropagation(); collapseTool('tool-calc')"><i class="fas fa-times"></i></button>
+            <div class="tool-card" onclick="openToolModal('prayer-modal')">
+                <div class="tool-title"><i class="fas fa-mosque"></i> Prayer Times (<span id="pr-location-preview">Dhaka</span>)</div>
+                <div id="next-prayer-name-preview" style="font-size: 2rem; color: var(--accent); margin: 15px 0;">Loading...</div>
+                <p id="next-prayer-time-preview" style="color: var(--text-muted); font-size: 0.9rem;">Fetching API...</p>
+                <p style="color: var(--text-muted); font-size: 0.8rem; margin-top:10px;">Click to open full times</p>
             </div>
 
-            <!-- Box 3: Placeholder -->
-            <div class="tool-card" style="cursor: default;">
-                <div class="tool-title" style="color: var(--text-muted);"><i class="fas fa-tools"></i> More Coming Soon</div>
-                <p style="opacity: 0.7; color: var(--text-muted);">New utilities are currently under development.</p>
+            <div class="tool-card" onclick="openToolModal('calc-modal')">
+                <div class="tool-title"><i class="fas fa-calculator"></i> Scientific Calculator</div>
+                <i class="fas fa-square-root-variable" style="font-size: 3rem; color: var(--text-muted); margin: 25px 0;"></i>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Click to open calculator</p>
+            </div>
+
+            <div class="tool-card" onclick="openToolModal('pass-modal')">
+                <div class="tool-title"><i class="fas fa-shield-halved"></i> Password Generator</div>
+                <i class="fas fa-key" style="font-size: 3rem; color: var(--text-muted); margin: 25px 0;"></i>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Click to open generator</p>
+            </div>
+
+            <div class="tool-card" onclick="openToolModal('json-modal')">
+                <div class="tool-title"><i class="fas fa-code"></i> JSON Formatter</div>
+                <i class="fas fa-brackets-curly" style="font-size: 3rem; color: var(--text-muted); margin: 25px 0;">{ }</i>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Prettify & format JSON texts</p>
+            </div>
+            
+            <div class="tool-card" onclick="openToolModal('base64-modal')">
+                <div class="tool-title"><i class="fas fa-file-code"></i> Base64 Encoder</div>
+                <i class="fas fa-arrows-rotate" style="font-size: 3rem; color: var(--text-muted); margin: 25px 0;"></i>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Encode & Decode text strings</p>
             </div>
             
         </div>
@@ -168,30 +122,208 @@
 
     <section class="container" style="padding-bottom: 80px;">
         <h2 style="margin-top: 2rem;">Premium Tools</h2>
-        
         <div class="premium-container" id="premium-section">
             <div class="premium-overlay" id="premium-overlay">
                 <i class="fas fa-lock" style="font-size: 3rem; color: var(--text-main); margin-bottom: 20px;"></i>
                 <h3 style="margin-bottom: 20px; color: var(--text-main);">Admin Exclusive Access</h3>
                 <button class="btn btn-primary" onclick="showLoginModal()">Please Login to Unlock</button>
             </div>
-            
-            <div class="premium-content">
-                <div class="tool-card" style="cursor: default;">
-                    <div class="tool-title"><i class="fas fa-network-wired"></i> Subnet Calculator</div>
-                    <p style="color: var(--text-muted);">Advanced VLSM and CIDR logic arrays.</p>
-                </div>
-                <div class="tool-card" style="cursor: default;">
-                    <div class="tool-title"><i class="fas fa-shield-alt"></i> ACL Generator</div>
-                    <p style="color: var(--text-muted);">Cisco/Juniper standard and extended configurations.</p>
-                </div>
-                <div class="tool-card" style="cursor: default;">
-                    <div class="tool-title"><i class="fas fa-signal"></i> Ping Sweep</div>
-                    <p style="color: var(--text-muted);">ICMP diagnostic sweep templates.</p>
-                </div>
+            <div class="premium-content skills-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); padding: 20px;">
+                <div class="skill-card"><i class="fas fa-server"></i><h3>Database Debugger</h3><p>Internal diagnostics.</p></div>
+                <div class="skill-card"><i class="fas fa-code-compare"></i><h3>Diff Viewer</h3><p>Git trace tracking.</p></div>
+                <div class="skill-card"><i class="fas fa-bug"></i><h3>Log Parser</h3><p>Raw JSON streams.</p></div>
             </div>
         </div>
     </section>
+
+    <!-- Modals -->
+    <div class="tool-modal" id="clock-modal">
+        <div class="tool-modal-content">
+            <i class="fas fa-times close-tool-modal" onclick="closeToolModal('clock-modal')"></i>
+            <h2 style="margin-bottom:20px; color: var(--text-main);"><i class="fas fa-clock"></i> World Clock & Focus</h2>
+            
+            <div id="digital-time" style="font-size: 3rem; color: var(--accent); font-variant-numeric: tabular-nums;">--:--:--</div>
+            
+            <hr style="border-color: var(--border); margin: 20px 0;">
+            <h3 style="margin-bottom:15px; font-size: 1.1rem; color: var(--text-main); text-align:left;">Time Zone Converter</h3>
+            <div id="timezone-list" style="text-align:left; margin-bottom:15px; max-height:150px; overflow-y:auto; background:var(--bg-color); padding:10px; border-radius:6px; border:1px solid var(--border);">
+            </div>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <input list="tz-cities" id="tz-city-select" class="tool-input" placeholder="Search City..." style="margin-bottom:0; flex:1;">
+                <datalist id="tz-cities"></datalist>
+                <button class="btn btn-primary" onclick="addTimezone()">Add</button>
+            </div>
+
+            <h3 style="margin-bottom:15px; margin-top:20px; font-size: 1.1rem; color: var(--text-main); text-align:left;">Pomodoro Tracker</h3>
+            <div style="background: var(--bg-color); border: 1px solid var(--border); padding: 20px; border-radius: 8px;">
+                <div style="display: flex; gap: 5px; margin-bottom: 15px;">
+                    <button class="btn btn-outline" style="flex:1; padding:5px; font-size:0.8rem;" onclick="setPomodoro(25)">25m Focus</button>
+                    <button class="btn btn-outline" style="flex:1; padding:5px; font-size:0.8rem;" onclick="setPomodoro(5)">5m Break</button>
+                </div>
+                <div id="task-timer-display" style="font-size: 2.5rem; color: var(--accent); margin-bottom: 15px; font-weight:bold; font-variant-numeric: tabular-nums;">25:00</div>
+                <div style="display:flex; gap: 10px;">
+                    <button id="timer-btn" class="btn btn-primary" style="flex: 2;" onclick="startPomodoro()">Start</button>
+                    <button class="btn btn-outline" style="flex: 1;" onclick="resetPomodoro()"><i class="fas fa-undo"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Prayer Modal -->
+    <div class="tool-modal" id="prayer-modal">
+        <div class="tool-modal-content">
+            <i class="fas fa-times close-tool-modal" onclick="closeToolModal('prayer-modal')"></i>
+            <h2 style="margin-bottom:20px; color: var(--text-main);"><i class="fas fa-mosque"></i> Prayer Times</h2>
+            
+            <div id="next-prayer-name" style="font-size: 2.5rem; color: var(--accent);">Loading...</div>
+            <p id="next-prayer-time" style="margin-top:5px; color: var(--text-muted); font-size:1.1rem;">Fetching API...</p>
+            <p id="hijri-date" style="margin-top:10px; color: var(--text-main); font-weight:600;"></p>
+            
+            <hr style="border-color: var(--border); margin: 20px 0;">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align:left; font-size:1.1rem;">
+                <div><strong style="color:var(--text-main);">Fajr:</strong> <span id="pr-fajr">--:--</span></div>
+                <div><strong style="color:var(--text-main);">Sunrise:</strong> <span id="pr-sunrise">--:--</span></div>
+                <div><strong style="color:var(--text-main);">Dhuhr:</strong> <span id="pr-dhuhr">--:--</span></div>
+                <div><strong style="color:var(--text-main);">Asr:</strong> <span id="pr-asr">--:--</span></div>
+                <div><strong style="color:var(--text-main);">Maghrib:</strong> <span id="pr-maghrib">--:--</span></div>
+                <div><strong style="color:var(--text-main);">Isha:</strong> <span id="pr-isha">--:--</span></div>
+            </div>
+            
+            <div style="font-size:0.8rem; color:var(--text-muted); margin-top: 20px;">Powered by Aladhan API &bull; <span id="pr-location">Dhaka</span> (Method: Karachi, Asr: Hanafi)</div>
+            <button class="btn btn-outline" style="width:100%; margin-top: 15px;" onclick="geolocatePrayer()"><i class="fas fa-location-crosshairs"></i> Detect My Location</button>
+        </div>
+    </div>
+
+    <!-- 3. Calculator Modal -->
+    <div class="tool-modal" id="calc-modal">
+        <div class="tool-modal-content" style="max-width: 400px;">
+            <i class="fas fa-times close-tool-modal" onclick="closeToolModal('calc-modal')"></i>
+            <h2 style="margin-bottom:20px; color: var(--text-main); text-align:left;"><i class="fas fa-calculator"></i> Calculator</h2>
+            
+            <input type="text" id="calc-display" class="calc-display" value="0">
+            
+            <div class="sci-mode">
+                <button class="calc-btn op" style="padding:10px; font-size:0.9rem;" onclick="calcAction('sin')">sin</button>
+                <button class="calc-btn op" style="padding:10px; font-size:0.9rem;" onclick="calcAction('cos')">cos</button>
+                <button class="calc-btn op" style="padding:10px; font-size:0.9rem;" onclick="calcAction('tan')">tan</button>
+                <button class="calc-btn op" style="padding:10px; font-size:0.9rem;" onclick="calcAction('log')">log</button>
+                <button class="calc-btn op" style="padding:10px; font-size:0.9rem;" onclick="calcAction('ln')">ln</button>
+                <button class="calc-btn op" style="padding:10px; font-size:0.9rem;" onclick="calcAction('sqrt')">√</button>
+                <button class="calc-btn op" style="padding:10px; font-size:0.9rem;" onclick="calcAction('pow')">x^y</button>
+                <button class="calc-btn op" style="padding:10px; font-size:0.9rem;" onclick="calcAction('factorial')">x!</button>
+                <button class="calc-btn op" style="padding:10px; font-size:0.9rem;" onclick="calcAction('pi')">π</button>
+                <button class="calc-btn op" style="padding:10px; font-size:0.9rem;" onclick="calcAction('e')">e</button>
+            </div>
+            
+            <div class="calc-grid">
+                <button class="calc-btn op" style="font-size:0.8rem; padding:10px;" onclick="calcAction('mc')">MC</button>
+                <button class="calc-btn op" style="font-size:0.8rem; padding:10px;" onclick="calcAction('mr')">MR</button>
+                <button class="calc-btn op" style="font-size:0.8rem; padding:10px;" onclick="calcAction('m+')">M+</button>
+                <button class="calc-btn op" style="font-size:0.8rem; padding:10px;" onclick="calcAction('m-')">M-</button>
+                
+                <button class="calc-btn" onclick="calcAction('clear')">C</button>
+                <button class="calc-btn" onclick="calcAction('backspace')"><i class="fas fa-backspace"></i></button>
+                <button class="calc-btn op" onclick="calcAction('%')">%</button>
+                <button class="calc-btn op" onclick="calcAction('/')">÷</button>
+                
+                <button class="calc-btn" onclick="calcAction('7')">7</button>
+                <button class="calc-btn" onclick="calcAction('8')">8</button>
+                <button class="calc-btn" onclick="calcAction('9')">9</button>
+                <button class="calc-btn op" onclick="calcAction('*')">×</button>
+                
+                <button class="calc-btn" onclick="calcAction('4')">4</button>
+                <button class="calc-btn" onclick="calcAction('5')">5</button>
+                <button class="calc-btn" onclick="calcAction('6')">6</button>
+                <button class="calc-btn op" onclick="calcAction('-')">-</button>
+                
+                <button class="calc-btn" onclick="calcAction('1')">1</button>
+                <button class="calc-btn" onclick="calcAction('2')">2</button>
+                <button class="calc-btn" onclick="calcAction('3')">3</button>
+                <button class="calc-btn op" onclick="calcAction('+')">+</button>
+                
+                <button class="calc-btn op" onclick="calcAction('plusminus')">±</button>
+                <button class="calc-btn" onclick="calcAction('0')">0</button>
+                <button class="calc-btn" onclick="calcAction('.')">.</button>
+                <button class="calc-btn op" style="background: var(--accent); color: white;" onclick="calcEvaluate()">=</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Password Modal -->
+    <div class="tool-modal" id="pass-modal">
+        <div class="tool-modal-content">
+            <i class="fas fa-times close-tool-modal" onclick="closeToolModal('pass-modal')"></i>
+            <h2 style="margin-bottom:20px; color: var(--text-main);"><i class="fas fa-key"></i> Password Generator</h2>
+            
+            <input type="text" id="gen-password-display" class="tool-input" style="font-size: 1.5rem; text-align: center; letter-spacing: 2px; font-family: monospace; background: var(--bg-color);" readonly value="Click Generate">
+            
+            <div style="text-align: left; margin-bottom:20px;">
+                <label style="font-size: 0.9rem; color: var(--text-main); display:block; margin-bottom:10px;">Security Length: <span id="pass-len-val" style="color:var(--accent); font-weight:bold;">16</span></label>
+                <input type="range" id="pass-length" min="8" max="64" value="16" style="width: 100%; accent-color: var(--accent);" oninput="document.getElementById('pass-len-val').innerText = this.value">
+            </div>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:25px; text-align: left; color: var(--text-main);">
+                <label style="cursor:pointer;"><input type="checkbox" id="pass-upper" checked style="accent-color: var(--accent);"> Uppercase</label>
+                <label style="cursor:pointer;"><input type="checkbox" id="pass-lower" checked style="accent-color: var(--accent);"> Lowercase</label>
+                <label style="cursor:pointer;"><input type="checkbox" id="pass-num" checked style="accent-color: var(--accent);"> Numbers</label>
+                <label style="cursor:pointer;"><input type="checkbox" id="pass-sym" checked style="accent-color: var(--accent);"> Symbols ( ! @ # $ )</label>
+            </div>
+            
+            <div style="display:flex; gap:10px; width: 100%;">
+                <button class="btn btn-outline" style="flex:1;" onclick="copyPassword()"><i class="fas fa-copy"></i> Copy</button>
+                <button class="btn btn-primary" style="flex:2;" onclick="generatePassword()">Generate Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. JSON Formatter Modal -->
+    <div class="tool-modal" id="json-modal">
+        <div class="tool-modal-content" style="max-width: 700px;">
+            <i class="fas fa-times close-tool-modal" onclick="closeToolModal('json-modal')"></i>
+            <h2 style="margin-bottom:20px; color: var(--text-main);"><i class="fas fa-code"></i> JSON Formatter</h2>
+            
+            <div style="text-align:left;">
+                <label style="color:var(--text-muted); font-size:0.9rem; display:block; margin-bottom:5px;">Input JSON:</label>
+                <textarea id="json-input" class="tool-input" rows="8" style="font-family: monospace; resize:vertical; background:var(--bg-color);" placeholder='{"key": "Paste your raw JSON here"}'></textarea>
+                
+                <div style="display:flex; gap:10px; margin-bottom: 15px;">
+                    <button class="btn btn-primary" style="flex:1;" onclick="formatJSON(2)">Format (2 Spaces)</button>
+                    <button class="btn btn-outline" style="flex:1;" onclick="formatJSON(4)">Format (4 Spaces)</button>
+                    <button class="btn btn-outline" style="flex:1;" onclick="minifyJSON()">Minify</button>
+                </div>
+                
+                <label id="json-status" style="color:var(--accent); font-weight:600; font-size:0.9rem; display:block; margin-bottom:5px;">Output:</label>
+                <textarea id="json-output" class="tool-input" rows="10" style="font-family: monospace; resize:vertical; background:var(--bg-color);" readonly placeholder='Result will appear here...'></textarea>
+                
+                <button class="btn btn-outline" style="width:100%;" onclick="copyJSON()"><i class="fas fa-copy"></i> Copy Output</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Base64 Modal -->
+    <div class="tool-modal" id="base64-modal">
+        <div class="tool-modal-content" style="max-width: 600px;">
+            <i class="fas fa-times close-tool-modal" onclick="closeToolModal('base64-modal')"></i>
+            <h2 style="margin-bottom:20px; color: var(--text-main);"><i class="fas fa-arrows-rotate"></i> Base64 Encoder / Decoder</h2>
+            
+            <div style="text-align:left;">
+                <label style="color:var(--text-muted); font-size:0.9rem; display:block; margin-bottom:5px;">Input Text / Base64 Data:</label>
+                <textarea id="base64-input" class="tool-input" rows="5" style="font-family: monospace; resize:vertical; background:var(--bg-color);" placeholder="Type or paste text here..."></textarea>
+                
+                <div style="display:flex; gap:10px; margin-bottom: 15px;">
+                    <button class="btn btn-primary" style="flex:1;" onclick="processBase64('encode')">Encode to Base64</button>
+                    <button class="btn btn-primary" style="flex:1; background:var(--bg-color); color:var(--text-main); border-color:var(--border);" onclick="processBase64('decode')">Decode from Base64</button>
+                </div>
+                
+                <div id="base64-error" style="color: #ef4444; margin-bottom:10px; display:none; font-size: 0.9em; font-weight:600;"></div>
+                
+                <label style="color:var(--text-muted); font-size:0.9rem; display:block; margin-bottom:5px;">Result:</label>
+                <textarea id="base64-output" class="tool-input" rows="5" style="font-family: monospace; resize:vertical; background:var(--bg-color);" readonly placeholder='Result...'></textarea>
+                
+                <button class="btn btn-outline" style="width:100%;" onclick="copyBase64()"><i class="fas fa-copy"></i> Copy Result</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Auth Modal -->
     <div class="auth-modal" id="auth-modal">
@@ -222,125 +354,6 @@
 
     <script src="js/supabase-client.js"></script>
     <script src="js/script.js"></script>
-    <script>
-        // -- Tool Interactivity --
-        function expandTool(element, type) {
-            if(element.classList.contains('expanded')) return;
-            
-            // Collapse others
-            document.querySelectorAll('.tool-card.expanded').forEach(card => collapseTool(card.id));
-            
-            element.classList.add('expanded');
-            if(type === 'clock') document.getElementById('close-clock').style.display = 'block';
-            if(type === 'calc') document.getElementById('close-calc').style.display = 'block';
-        }
-        
-        function collapseTool(id) {
-            const el = document.getElementById(id);
-            if(el) {
-                el.classList.remove('expanded');
-                if(id === 'tool-clock') document.getElementById('close-clock').style.display = 'none';
-                if(id === 'tool-calc') document.getElementById('close-calc').style.display = 'none';
-            }
-        }
-
-        // -- Clock Logic --
-        setInterval(() => {
-            const now = new Date();
-            document.getElementById('local-time').innerText = now.toLocaleTimeString('en-US', { hour12: false });
-        }, 1000);
-
-        function calculateTimezone() {
-            const offset = parseFloat(document.getElementById('tz-offset').value);
-            if(isNaN(offset)) return;
-            const now = new Date();
-            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-            const targetDate = new Date(utc + (3600000 * offset));
-            document.getElementById('tz-result').innerText = targetDate.toLocaleTimeString('en-US', { hour12: false });
-        }
-
-        // -- Calculator Logic --
-        let calcVal = '0';
-        function updateCalcDisplay() { document.getElementById('calc-display').innerText = calcVal; }
-        function calcAppend(num) {
-            if(calcVal === '0' || calcVal === 'Error') calcVal = num;
-            else calcVal += num;
-            updateCalcDisplay();
-        }
-        function calcAction(op) {
-            if(op === 'clear') calcVal = '0';
-            else if(['sin', 'cos', 'tan', 'log'].includes(op)) {
-                try {
-                    const val = parseFloat(calcVal);
-                    if(op === 'sin') calcVal = Math.sin(val).toFixed(4);
-                    if(op === 'cos') calcVal = Math.cos(val).toFixed(4);
-                    if(op === 'tan') calcVal = Math.tan(val).toFixed(4);
-                    if(op === 'log') calcVal = Math.log10(val).toFixed(4);
-                } catch(e) { calcVal = 'Error'; }
-            }
-            else calcVal += op;
-            updateCalcDisplay();
-        }
-        function calcEvaluate() {
-            try { 
-                // Using basic eval for isolated frontend demo. Safe since input is entirely constrained to button presses via UI.
-                calcVal = eval(calcVal).toString(); 
-            } 
-            catch(e) { calcVal = 'Error'; }
-            updateCalcDisplay();
-        }
-
-        // -- Auth Logic --
-        async function checkSession() {
-            try {
-                // Relying on global window.SupabaseClient defined in js/supabase-client.js
-                const session = await window.SupabaseClient.getSession();
-                if(session) {
-                    unlockPremium();
-                }
-            } catch(e) {
-                console.error("Session check failed", e);
-            }
-        }
-
-        function unlockPremium() {
-            const overlay = document.getElementById('premium-overlay');
-            overlay.style.opacity = '0';
-            setTimeout(() => {
-                overlay.style.display = 'none';
-            }, 500);
-            document.querySelector('.premium-content').style.opacity = '1';
-            document.querySelector('.premium-content').style.pointerEvents = 'auto';
-        }
-
-        function showLoginModal() {
-            document.getElementById('auth-modal').style.display = 'flex';
-        }
-
-        function closeLoginModal() {
-            document.getElementById('auth-modal').style.display = 'none';
-            document.getElementById('login-error').style.display = 'none';
-        }
-
-        async function executeLogin() {
-            const email = document.getElementById('login-email').value;
-            const pass = document.getElementById('login-pass').value;
-            const errBox = document.getElementById('login-error');
-            
-            errBox.style.display = 'none';
-            
-            const result = await window.SupabaseClient.login(email, pass);
-            if(result.success) {
-                closeLoginModal();
-                unlockPremium();
-            } else {
-                errBox.innerText = result.error || "Login failed.";
-                errBox.style.display = 'block';
-            }
-        }
-
-        // Run on load
-        document.addEventListener('DOMContentLoaded', checkSession);
-    </script>
+    <script src="js/tools.js"></script>
 </body>
 </html>
