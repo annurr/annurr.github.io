@@ -48,3 +48,6 @@ This project is a dynamic portfolio and blog management system designed to be li
   - cron: `0 0 * * *`  
   - job: `INSERT INTO public.heartbeat_logs (created_at) VALUES (NOW());`
   - System `postgres` role bypasses RLS for insertion.
+
+## 3. UI Component Lifecycle
+- **Tab Manager:** `admin.html` orchestrates view states (e.g. `audit-log-view`, `system-monitor-view`) using `setActiveTab()`. Prior to rendering the new active tab, all sibling components are hidden via `display: none` to prevent DOM attachment leakage/overlapping across states.

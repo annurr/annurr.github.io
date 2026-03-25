@@ -522,7 +522,7 @@
                     </div>
                 </div>
                 <div class="log-container"
-                    style="max-height: 500px; overflow-y: auto; font-family: monospace; background: #0f172a; padding: 15px; border-radius: 8px;">
+                    style="max-height: 500px; overflow-y: auto; font-family: monospace; background: var(--bg-color); padding: 15px; border-radius: 8px; border: 1px solid var(--border);">
                     <table style="width:100%; font-size: 0.9em;">
                         <thead>
                             <tr style="text-align:left; color: var(--accent);">
@@ -545,7 +545,7 @@
                     </div>
                 </div>
                 <div class="log-container"
-                    style="max-height: 500px; overflow-y: auto; font-family: monospace; background: #0f172a; padding: 15px; border-radius: 8px;">
+                    style="max-height: 500px; overflow-y: auto; font-family: monospace; background: var(--bg-color); padding: 15px; border-radius: 8px; border: 1px solid var(--border);">
                     <table style="width:100%; font-size: 0.9em;">
                         <thead>
                             <tr style="text-align:left; color: var(--accent);">
@@ -676,7 +676,7 @@
             // --- Tab Manager ---
             function setActiveTab(tabBtnId, viewId, title) {
                 // Hide all views
-                const views = ['list-view', 'editor-view', 'audit-log-view', 'homepage-mgmt-view'];
+                const views = ['list-view', 'editor-view', 'audit-log-view', 'homepage-mgmt-view', 'system-monitor-view'];
                 views.forEach(id => document.getElementById(id).style.display = 'none');
 
                 // Hide Modals/Forms

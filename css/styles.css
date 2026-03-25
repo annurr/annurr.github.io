@@ -34,9 +34,9 @@ header {
     --bg-card: #ffffff;
     --text-main: #0f172a;
     --text-muted: #64748b;
-    --accent: #0891b2;
-    /* Cyan 600 - slightly darker for contrast */
-    --accent-hover: #06b6d4;
+    --accent: #0e7490;
+    /* Cyan 700 - WCAG AA compliant contrast against white */
+    --accent-hover: #0891b2;
     --border: #e2e8f0;
     --nav-bg: rgba(255, 255, 255, 0.9);
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
