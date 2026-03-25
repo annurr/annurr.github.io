@@ -19,17 +19,32 @@ This project is a dynamic portfolio and blog management system designed to be li
        |  (REST API / fetch via supabase-js or standard HTTP requests)
        v
 
-[ Backend (Supabase) ]
-  |-- Authentication : Protects the admin panel. Only authorized users can access the dashboard.
-  |-- PostgreSQL Database :
-       |-- `homepage_config` : Stores dynamic portfolio settings (hero text, links, etc).
-       |-- `posts`           : Stores blog content (title, excerpt, body, image_url).
-       |-- `audit_logs`      : Custom logging table recording frontend admin actions (logins, creations, deletions).
-       |-- `heartbeat_logs`  : Automated table for database uptime monitoring.
-       |-- `github_action_logs` : Stores keep-alive ping statuses triggered by GitHub Actions.
+# Architecture Schema
+[Frontend: GitHub Pages | Backend: Supabase/PostgreSQL]
 
-## 3. Security & Monitoring
-- **Row Level Security (RLS):** Enforced on Supabase tables ensuring that only authenticated admin users can Insert/Update/Delete data (public can only Select/Read).
-- **Keep-Alive (Anti-Pause):**
-  - **GitHub Actions:** `.github/workflows/keep_alive.yml` runs a daily `curl` ping against the Supabase REST API `/rest/v1/`.
-  - **Supabase pg_cron:** An internal job runs daily to insert a timestamp into `heartbeat_logs` to keep the postgres instance active.
+## 1. Tables & RLS Policies
+- `posts` 
+  - (PK: `id`, cols: `title`, `excerpt`, `content`, `image`, `tags`, `deleted`, `created_at`, `updated_at`)
+  - RLS: Public=SELECT, Admin=ALL
+- `homepage_config`
+  - (PK: `id`='global_config_v1', cols: `config`, `updated_at`)
+  - RLS: Public=SELECT, Admin=ALL
+- `audit_logs`
+  - (PK: `id`, cols: `event_type`, `description`, `actor`, `created_at`)
+  - RLS: Admin=SELECT, INSERT
+- `heartbeat_logs`
+  - (PK: `id`, cols: `created_at`)
+  - RLS: Admin=SELECT
+- `github_action_logs`
+  - (PK: `id`, cols: `status`, `error_message`, `created_at`)
+  - RLS: Admin=SELECT, Anon=INSERT
+
+## 2. Keep-Alive Workflows
+- **GitHub Action** (`.github/workflows/keep_alive.yml`)
+  - cron: `0 0 * * *`
+  - ping: `GET /rest/v1/`
+  - log: `POST /rest/v1/github_action_logs` (using Anon key).
+- **pg_cron Heartbeat**
+  - cron: `0 0 * * *`  
+  - job: `INSERT INTO public.heartbeat_logs (created_at) VALUES (NOW());`
+  - System `postgres` role bypasses RLS for insertion.
