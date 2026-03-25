@@ -1247,44 +1247,7 @@ footer {
 
 
 /* Responsive Breakpoints */
-@media (min-width: 768px) {
-    .timeline::after {
-        left: 50%;
-        margin-left: -1px;
-    }
 
-    .timeline-item {
-        width: 50%;
-        padding-left: 0;
-        padding-right: 40px;
-        text-align: right;
-        left: 0;
-    }
-
-    .timeline-item:nth-child(even) {
-        left: 50%;
-        padding-left: 40px;
-        padding-right: 0;
-        text-align: left;
-    }
-
-    .timeline-item::before {
-        left: auto;
-        right: -6px;
-    }
-
-    .timeline-item:nth-child(even)::before {
-        left: -6px;
-    }
-
-    .timeline-item ul {
-        list-style-position: inside;
-    }
-
-    .timeline-item:nth-child(even) ul {
-        text-align: left;
-    }
-}
 
 @media (max-width: 768px) {
     .nav-links {
