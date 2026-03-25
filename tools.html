@@ -78,43 +78,64 @@
     </div>
 
     <section class="container" style="padding-bottom: 40px;">
-        <div class="skills-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+        <div class="skills-grid" style="grid-template-columns: repeat(3, 1fr); gap: 25px;">
             
+            <!-- Row 1 -->
             <div class="tool-card" onclick="openToolModal('clock-modal')">
-                <div class="tool-title"><i class="fas fa-clock"></i> World Clock & Focus</div>
+                <div class="tool-title"><i class="fas fa-clock" style="color: var(--accent);"></i> World Clock</div>
                 <div id="digital-time-preview" style="font-size: 2.5rem; color: var(--accent); font-variant-numeric: tabular-nums; margin: 15px 0;">--:--:--</div>
-                <p style="color: var(--text-muted); font-size: 0.9rem;">Click to open converter</p>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">View global timezones</p>
             </div>
 
             <div class="tool-card" onclick="openToolModal('prayer-modal')">
-                <div class="tool-title"><i class="fas fa-mosque"></i> Prayer Times (<span id="pr-location-preview">Dhaka</span>)</div>
-                <div id="next-prayer-name-preview" style="font-size: 2rem; color: var(--accent); margin: 15px 0;">Loading...</div>
+                <div class="tool-title"><i class="fas fa-mosque" style="color: #10b981;"></i> Prayer Times</div>
+                <div id="next-prayer-name-preview" style="font-size: 2rem; color: #10b981; margin: 15px 0;">Loading...</div>
                 <p id="next-prayer-time-preview" style="color: var(--text-muted); font-size: 0.9rem;">Fetching API...</p>
-                <p style="color: var(--text-muted); font-size: 0.8rem; margin-top:10px;">Click to open full times</p>
+                <div style="font-size: 0.8rem; margin-top:5px; color:var(--text-muted);"><i class="fas fa-location-dot"></i> <span id="pr-location-preview">Dhaka</span></div>
             </div>
 
             <div class="tool-card" onclick="openToolModal('calc-modal')">
-                <div class="tool-title"><i class="fas fa-calculator"></i> Scientific Calculator</div>
+                <div class="tool-title"><i class="fas fa-calculator" style="color: #6366f1;"></i> Sci-Calculator</div>
                 <i class="fas fa-square-root-variable" style="font-size: 3rem; color: var(--text-muted); margin: 25px 0;"></i>
-                <p style="color: var(--text-muted); font-size: 0.9rem;">Click to open calculator</p>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Advanced memory functions</p>
             </div>
 
+            <!-- Row 2 -->
             <div class="tool-card" onclick="openToolModal('pass-modal')">
-                <div class="tool-title"><i class="fas fa-shield-halved"></i> Password Generator</div>
+                <div class="tool-title"><i class="fas fa-shield-halved" style="color: #f59e0b;"></i> Password Gen</div>
                 <i class="fas fa-key" style="font-size: 3rem; color: var(--text-muted); margin: 25px 0;"></i>
-                <p style="color: var(--text-muted); font-size: 0.9rem;">Click to open generator</p>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Secure & entropy scored</p>
             </div>
 
-            <div class="tool-card" onclick="openToolModal('json-modal')">
-                <div class="tool-title"><i class="fas fa-code"></i> JSON Formatter</div>
-                <i class="fas fa-brackets-curly" style="font-size: 3rem; color: var(--text-muted); margin: 25px 0;">{ }</i>
-                <p style="color: var(--text-muted); font-size: 0.9rem;">Prettify & format JSON texts</p>
+            <div class="tool-card" onclick="openToolModal('pomo-modal')">
+                <div class="tool-title"><i class="fas fa-stopwatch" style="color: #ef4444;"></i> Pomodoro Tracker</div>
+                <div id="pomo-preview" style="font-size: 2.5rem; color: #ef4444; font-variant-numeric: tabular-nums; font-weight:bold; margin: 15px 0;">25:00</div>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Focus timers</p>
             </div>
-            
-            <div class="tool-card" onclick="openToolModal('base64-modal')">
-                <div class="tool-title"><i class="fas fa-file-code"></i> Base64 Encoder</div>
-                <i class="fas fa-arrows-rotate" style="font-size: 3rem; color: var(--text-muted); margin: 25px 0;"></i>
-                <p style="color: var(--text-muted); font-size: 0.9rem;">Encode & Decode text strings</p>
+
+            <div class="tool-card" onclick="openToolModal('subnet-modal')">
+                <div class="tool-title"><i class="fas fa-network-wired" style="color: #8b5cf6;"></i> Subnet Calc</div>
+                <i class="fas fa-server" style="font-size: 3rem; color: var(--text-muted); margin: 25px 0;"></i>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">IP network math</p>
+            </div>
+
+            <!-- Row 3 -->
+            <div class="tool-card" onclick="openToolModal('diff-modal')">
+                <div class="tool-title"><i class="fas fa-file-code" style="color: #ec4899;"></i> Text Diff Tool</div>
+                <i class="fas fa-code-compare" style="font-size: 3rem; color: var(--text-muted); margin: 25px 0;"></i>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Compare text versions</p>
+            </div>
+
+            <div class="tool-card" onclick="openToolModal('unit-modal')">
+                <div class="tool-title"><i class="fas fa-ruler-combined" style="color: #f97316;"></i> Unit Converter</div>
+                <i class="fas fa-weight-scale" style="font-size: 3rem; color: var(--text-muted); margin: 25px 0;"></i>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Length, Weight & Data</p>
+            </div>
+
+            <div class="tool-card" onclick="openToolModal('epoch-modal')">
+                <div class="tool-title"><i class="fas fa-hourglass-start" style="color: #14b8a6;"></i> Epoch Converter</div>
+                <i class="fas fa-calendar-days" style="font-size: 3rem; color: var(--text-muted); margin: 25px 0;"></i>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Unix timestamp to Date</p>
             </div>
             
         </div>
@@ -136,35 +157,28 @@
         </div>
     </section>
 
-    <!-- Modals -->
+    <!-- 1. World Clock Modal -->
     <div class="tool-modal" id="clock-modal">
-        <div class="tool-modal-content">
+        <div class="tool-modal-content" style="max-width: 500px;">
             <i class="fas fa-times close-tool-modal" onclick="closeToolModal('clock-modal')"></i>
-            <h2 style="margin-bottom:20px; color: var(--text-main);"><i class="fas fa-clock"></i> World Clock & Focus</h2>
+            <h2 style="margin-bottom:20px; color: var(--text-main);"><i class="fas fa-clock" style="color:var(--accent);"></i> World Clock</h2>
             
             <div id="digital-time" style="font-size: 3rem; color: var(--accent); font-variant-numeric: tabular-nums;">--:--:--</div>
             
             <hr style="border-color: var(--border); margin: 20px 0;">
-            <h3 style="margin-bottom:15px; font-size: 1.1rem; color: var(--text-main); text-align:left;">Time Zone Converter</h3>
-            <div id="timezone-list" style="text-align:left; margin-bottom:15px; max-height:150px; overflow-y:auto; background:var(--bg-color); padding:10px; border-radius:6px; border:1px solid var(--border);">
+            <div style="text-align:left; margin-bottom:15px; max-height:200px; overflow-y:auto; background:var(--bg-color); padding:10px; border-radius:6px; border:1px solid var(--border);" id="timezone-list">
             </div>
-            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                 <input list="tz-cities" id="tz-city-select" class="tool-input" placeholder="Search City..." style="margin-bottom:0; flex:1;">
                 <datalist id="tz-cities"></datalist>
                 <button class="btn btn-primary" onclick="addTimezone()">Add</button>
             </div>
 
-            <h3 style="margin-bottom:15px; margin-top:20px; font-size: 1.1rem; color: var(--text-main); text-align:left;">Pomodoro Tracker</h3>
-            <div style="background: var(--bg-color); border: 1px solid var(--border); padding: 20px; border-radius: 8px;">
-                <div style="display: flex; gap: 5px; margin-bottom: 15px;">
-                    <button class="btn btn-outline" style="flex:1; padding:5px; font-size:0.8rem;" onclick="setPomodoro(25)">25m Focus</button>
-                    <button class="btn btn-outline" style="flex:1; padding:5px; font-size:0.8rem;" onclick="setPomodoro(5)">5m Break</button>
-                </div>
-                <div id="task-timer-display" style="font-size: 2.5rem; color: var(--accent); margin-bottom: 15px; font-weight:bold; font-variant-numeric: tabular-nums;">25:00</div>
-                <div style="display:flex; gap: 10px;">
-                    <button id="timer-btn" class="btn btn-primary" style="flex: 2;" onclick="startPomodoro()">Start</button>
-                    <button class="btn btn-outline" style="flex: 1;" onclick="resetPomodoro()"><i class="fas fa-undo"></i></button>
-                </div>
+            <div style="text-align: left;">
+                <label style="font-size: 0.9rem; color: var(--text-main); display:block; margin-bottom:10px;">Time Scrub (Preview mode): <span id="time-scrub-val" style="color:var(--accent);">Live</span></label>
+                <input type="range" id="time-scrub" min="0" max="1439" value="" style="width: 100%; accent-color: var(--accent);" oninput="updateScrubTime()">
+                <button class="btn btn-outline" style="width:100%; margin-top:10px; padding: 8px;" onclick="resetScrubTime()"><i class="fas fa-rotate-left"></i> Reset to Live System Time</button>
             </div>
         </div>
     </div>
@@ -173,9 +187,9 @@
     <div class="tool-modal" id="prayer-modal">
         <div class="tool-modal-content">
             <i class="fas fa-times close-tool-modal" onclick="closeToolModal('prayer-modal')"></i>
-            <h2 style="margin-bottom:20px; color: var(--text-main);"><i class="fas fa-mosque"></i> Prayer Times</h2>
+            <h2 style="margin-bottom:20px; color: var(--text-main);"><i class="fas fa-mosque" style="color:#10b981;"></i> Prayer Times</h2>
             
-            <div id="next-prayer-name" style="font-size: 2.5rem; color: var(--accent);">Loading...</div>
+            <div id="next-prayer-name" style="font-size: 2.5rem; color: #10b981;">Loading...</div>
             <p id="next-prayer-time" style="margin-top:5px; color: var(--text-muted); font-size:1.1rem;">Fetching API...</p>
             <p id="hijri-date" style="margin-top:10px; color: var(--text-main); font-weight:600;"></p>
             
@@ -189,7 +203,7 @@
                 <div><strong style="color:var(--text-main);">Isha:</strong> <span id="pr-isha">--:--</span></div>
             </div>
             
-            <div style="font-size:0.8rem; color:var(--text-muted); margin-top: 20px;">Powered by Aladhan API &bull; <span id="pr-location">Dhaka</span> (Method: Karachi, Asr: Hanafi)</div>
+            <div style="font-size:0.8rem; color:var(--text-muted); margin-top: 20px;">Powered by Aladhan API &bull; <span id="pr-location">Dhaka</span></div>
             <button class="btn btn-outline" style="width:100%; margin-top: 15px;" onclick="geolocatePrayer()"><i class="fas fa-location-crosshairs"></i> Detect My Location</button>
         </div>
     </div>
@@ -198,53 +212,50 @@
     <div class="tool-modal" id="calc-modal">
         <div class="tool-modal-content" style="max-width: 400px;">
             <i class="fas fa-times close-tool-modal" onclick="closeToolModal('calc-modal')"></i>
-            <h2 style="margin-bottom:20px; color: var(--text-main); text-align:left;"><i class="fas fa-calculator"></i> Calculator</h2>
-            
+            <h2 style="margin-bottom:20px; color: var(--text-main); text-align:left;"><i class="fas fa-calculator" style="color:#6366f1;"></i> Calculator</h2>
             <input type="text" id="calc-display" class="calc-display" value="0">
-            
             <div class="sci-mode">
-                <button class="calc-btn op" style="padding:10px; font-size:0.9rem;" onclick="calcAction('sin')">sin</button>
-                <button class="calc-btn op" style="padding:10px; font-size:0.9rem;" onclick="calcAction('cos')">cos</button>
-                <button class="calc-btn op" style="padding:10px; font-size:0.9rem;" onclick="calcAction('tan')">tan</button>
-                <button class="calc-btn op" style="padding:10px; font-size:0.9rem;" onclick="calcAction('log')">log</button>
-                <button class="calc-btn op" style="padding:10px; font-size:0.9rem;" onclick="calcAction('ln')">ln</button>
-                <button class="calc-btn op" style="padding:10px; font-size:0.9rem;" onclick="calcAction('sqrt')">√</button>
-                <button class="calc-btn op" style="padding:10px; font-size:0.9rem;" onclick="calcAction('pow')">x^y</button>
-                <button class="calc-btn op" style="padding:10px; font-size:0.9rem;" onclick="calcAction('factorial')">x!</button>
-                <button class="calc-btn op" style="padding:10px; font-size:0.9rem;" onclick="calcAction('pi')">π</button>
-                <button class="calc-btn op" style="padding:10px; font-size:0.9rem;" onclick="calcAction('e')">e</button>
+                <button class="calc-btn op" style="padding:10px; font-size:0.9rem; color:#6366f1;" onclick="calcAction('sin')">sin</button>
+                <button class="calc-btn op" style="padding:10px; font-size:0.9rem; color:#6366f1;" onclick="calcAction('cos')">cos</button>
+                <button class="calc-btn op" style="padding:10px; font-size:0.9rem; color:#6366f1;" onclick="calcAction('tan')">tan</button>
+                <button class="calc-btn op" style="padding:10px; font-size:0.9rem; color:#6366f1;" onclick="calcAction('log')">log</button>
+                <button class="calc-btn op" style="padding:10px; font-size:0.9rem; color:#6366f1;" onclick="calcAction('ln')">ln</button>
+                <button class="calc-btn op" style="padding:10px; font-size:0.9rem; color:#6366f1;" onclick="calcAction('sqrt')">√</button>
+                <button class="calc-btn op" style="padding:10px; font-size:0.9rem; color:#6366f1;" onclick="calcAction('pow')">x^y</button>
+                <button class="calc-btn op" style="padding:10px; font-size:0.9rem; color:#6366f1;" onclick="calcAction('factorial')">x!</button>
+                <button class="calc-btn op" style="padding:10px; font-size:0.9rem; color:#6366f1;" onclick="calcAction('pi')">π</button>
+                <button class="calc-btn op" style="padding:10px; font-size:0.9rem; color:#6366f1;" onclick="calcAction('e')">e</button>
             </div>
-            
             <div class="calc-grid">
-                <button class="calc-btn op" style="font-size:0.8rem; padding:10px;" onclick="calcAction('mc')">MC</button>
-                <button class="calc-btn op" style="font-size:0.8rem; padding:10px;" onclick="calcAction('mr')">MR</button>
-                <button class="calc-btn op" style="font-size:0.8rem; padding:10px;" onclick="calcAction('m+')">M+</button>
-                <button class="calc-btn op" style="font-size:0.8rem; padding:10px;" onclick="calcAction('m-')">M-</button>
+                <button class="calc-btn op" style="font-size:0.8rem; padding:10px; color:#6366f1;" onclick="calcAction('mc')">MC</button>
+                <button class="calc-btn op" style="font-size:0.8rem; padding:10px; color:#6366f1;" onclick="calcAction('mr')">MR</button>
+                <button class="calc-btn op" style="font-size:0.8rem; padding:10px; color:#6366f1;" onclick="calcAction('m+')">M+</button>
+                <button class="calc-btn op" style="font-size:0.8rem; padding:10px; color:#6366f1;" onclick="calcAction('m-')">M-</button>
                 
                 <button class="calc-btn" onclick="calcAction('clear')">C</button>
                 <button class="calc-btn" onclick="calcAction('backspace')"><i class="fas fa-backspace"></i></button>
-                <button class="calc-btn op" onclick="calcAction('%')">%</button>
-                <button class="calc-btn op" onclick="calcAction('/')">÷</button>
+                <button class="calc-btn op" style="color:#6366f1;" onclick="calcAction('%')">%</button>
+                <button class="calc-btn op" style="color:#6366f1;" onclick="calcAction('/')">÷</button>
                 
                 <button class="calc-btn" onclick="calcAction('7')">7</button>
                 <button class="calc-btn" onclick="calcAction('8')">8</button>
                 <button class="calc-btn" onclick="calcAction('9')">9</button>
-                <button class="calc-btn op" onclick="calcAction('*')">×</button>
+                <button class="calc-btn op" style="color:#6366f1;" onclick="calcAction('*')">×</button>
                 
                 <button class="calc-btn" onclick="calcAction('4')">4</button>
                 <button class="calc-btn" onclick="calcAction('5')">5</button>
                 <button class="calc-btn" onclick="calcAction('6')">6</button>
-                <button class="calc-btn op" onclick="calcAction('-')">-</button>
+                <button class="calc-btn op" style="color:#6366f1;" onclick="calcAction('-')">-</button>
                 
                 <button class="calc-btn" onclick="calcAction('1')">1</button>
                 <button class="calc-btn" onclick="calcAction('2')">2</button>
                 <button class="calc-btn" onclick="calcAction('3')">3</button>
-                <button class="calc-btn op" onclick="calcAction('+')">+</button>
+                <button class="calc-btn op" style="color:#6366f1;" onclick="calcAction('+')">+</button>
                 
-                <button class="calc-btn op" onclick="calcAction('plusminus')">±</button>
+                <button class="calc-btn op" style="color:#6366f1;" onclick="calcAction('plusminus')">±</button>
                 <button class="calc-btn" onclick="calcAction('0')">0</button>
                 <button class="calc-btn" onclick="calcAction('.')">.</button>
-                <button class="calc-btn op" style="background: var(--accent); color: white;" onclick="calcEvaluate()">=</button>
+                <button class="calc-btn op" style="background: #6366f1; color: white;" onclick="calcEvaluate()">=</button>
             </div>
         </div>
     </div>
@@ -253,74 +264,176 @@
     <div class="tool-modal" id="pass-modal">
         <div class="tool-modal-content">
             <i class="fas fa-times close-tool-modal" onclick="closeToolModal('pass-modal')"></i>
-            <h2 style="margin-bottom:20px; color: var(--text-main);"><i class="fas fa-key"></i> Password Generator</h2>
+            <h2 style="margin-bottom:20px; color: var(--text-main);"><i class="fas fa-key" style="color:#f59e0b;"></i> Password Gen</h2>
             
-            <input type="text" id="gen-password-display" class="tool-input" style="font-size: 1.5rem; text-align: center; letter-spacing: 2px; font-family: monospace; background: var(--bg-color);" readonly value="Click Generate">
+            <input type="text" id="gen-password-display" class="tool-input" style="font-size: 1.5rem; text-align: center; letter-spacing: 2px; font-family: monospace; background: var(--bg-color);" oninput="updateEntropyMeter()">
             
+            <div style="margin-bottom:20px;">
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:5px;">
+                    <span style="color:var(--text-muted);">Strength:</span>
+                    <span id="entropy-label" style="font-weight:bold; color:#ef4444;">Weak</span>
+                </div>
+                <div style="width:100%; height:8px; background:var(--bg-color); border-radius:4px; overflow:hidden;">
+                    <div id="entropy-bar" style="height:100%; width:20%; background:#ef4444; transition:all 0.3s ease;"></div>
+                </div>
+            </div>
+
             <div style="text-align: left; margin-bottom:20px;">
-                <label style="font-size: 0.9rem; color: var(--text-main); display:block; margin-bottom:10px;">Security Length: <span id="pass-len-val" style="color:var(--accent); font-weight:bold;">16</span></label>
-                <input type="range" id="pass-length" min="8" max="64" value="16" style="width: 100%; accent-color: var(--accent);" oninput="document.getElementById('pass-len-val').innerText = this.value">
+                <label style="font-size: 0.9rem; color: var(--text-main); display:block; margin-bottom:10px;">Length: <span id="pass-len-val" style="color:#f59e0b; font-weight:bold;">16</span></label>
+                <input type="range" id="pass-length" min="8" max="64" value="16" style="width: 100%; accent-color: #f59e0b;" oninput="document.getElementById('pass-len-val').innerText = this.value; generatePassword();">
             </div>
             
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:25px; text-align: left; color: var(--text-main);">
-                <label style="cursor:pointer;"><input type="checkbox" id="pass-upper" checked style="accent-color: var(--accent);"> Uppercase</label>
-                <label style="cursor:pointer;"><input type="checkbox" id="pass-lower" checked style="accent-color: var(--accent);"> Lowercase</label>
-                <label style="cursor:pointer;"><input type="checkbox" id="pass-num" checked style="accent-color: var(--accent);"> Numbers</label>
-                <label style="cursor:pointer;"><input type="checkbox" id="pass-sym" checked style="accent-color: var(--accent);"> Symbols ( ! @ # $ )</label>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px; text-align: left; color: var(--text-main);">
+                <label style="cursor:pointer;"><input type="checkbox" id="pass-upper" checked style="accent-color: #f59e0b;" onchange="generatePassword()"> Uppercase</label>
+                <label style="cursor:pointer;"><input type="checkbox" id="pass-lower" checked style="accent-color: #f59e0b;" onchange="generatePassword()"> Lowercase</label>
+                <label style="cursor:pointer;"><input type="checkbox" id="pass-num" checked style="accent-color: #f59e0b;" onchange="generatePassword()"> Numbers</label>
+                <label style="cursor:pointer;"><input type="checkbox" id="pass-sym" checked style="accent-color: #f59e0b;" onchange="generatePassword()"> Symbols (!@#)</label>
+            </div>
+            <div style="text-align:left; margin-bottom:20px;">
+                <label style="cursor:pointer; font-size:0.9rem;"><input type="checkbox" id="pass-strict" style="accent-color: #f59e0b;" onchange="generatePassword()"> No Specials at Start/End</label>
             </div>
             
             <div style="display:flex; gap:10px; width: 100%;">
-                <button class="btn btn-outline" style="flex:1;" onclick="copyPassword()"><i class="fas fa-copy"></i> Copy</button>
-                <button class="btn btn-primary" style="flex:2;" onclick="generatePassword()">Generate Now</button>
+                <button class="btn btn-outline" style="flex:1; color:#f59e0b; border-color:#f59e0b;" onclick="copyPassword()"><i class="fas fa-copy"></i> Copy</button>
+                <button class="btn btn-primary" style="flex:2; background:#f59e0b; border-color:#f59e0b; color:#fff;" onclick="generatePassword()">Generate New</button>
             </div>
         </div>
     </div>
 
-    <!-- 5. JSON Formatter Modal -->
-    <div class="tool-modal" id="json-modal">
-        <div class="tool-modal-content" style="max-width: 700px;">
-            <i class="fas fa-times close-tool-modal" onclick="closeToolModal('json-modal')"></i>
-            <h2 style="margin-bottom:20px; color: var(--text-main);"><i class="fas fa-code"></i> JSON Formatter</h2>
+    <!-- 5. Pomodoro Modal -->
+    <div class="tool-modal" id="pomo-modal">
+        <div class="tool-modal-content" style="max-width: 400px;">
+            <i class="fas fa-times close-tool-modal" onclick="closeToolModal('pomo-modal')"></i>
+            <h2 style="margin-bottom:20px; color: var(--text-main);"><i class="fas fa-stopwatch" style="color:#ef4444;"></i> Focus Tracker</h2>
             
-            <div style="text-align:left;">
-                <label style="color:var(--text-muted); font-size:0.9rem; display:block; margin-bottom:5px;">Input JSON:</label>
-                <textarea id="json-input" class="tool-input" rows="8" style="font-family: monospace; resize:vertical; background:var(--bg-color);" placeholder='{"key": "Paste your raw JSON here"}'></textarea>
-                
-                <div style="display:flex; gap:10px; margin-bottom: 15px;">
-                    <button class="btn btn-primary" style="flex:1;" onclick="formatJSON(2)">Format (2 Spaces)</button>
-                    <button class="btn btn-outline" style="flex:1;" onclick="formatJSON(4)">Format (4 Spaces)</button>
-                    <button class="btn btn-outline" style="flex:1;" onclick="minifyJSON()">Minify</button>
-                </div>
-                
-                <label id="json-status" style="color:var(--accent); font-weight:600; font-size:0.9rem; display:block; margin-bottom:5px;">Output:</label>
-                <textarea id="json-output" class="tool-input" rows="10" style="font-family: monospace; resize:vertical; background:var(--bg-color);" readonly placeholder='Result will appear here...'></textarea>
-                
-                <button class="btn btn-outline" style="width:100%;" onclick="copyJSON()"><i class="fas fa-copy"></i> Copy Output</button>
+            <div style="position:relative; width:220px; height:220px; margin:0 auto 20px;">
+                <svg width="220" height="220" viewBox="0 0 220 220">
+                    <circle cx="110" cy="110" r="100" fill="none" stroke="var(--border)" stroke-width="10"></circle>
+                    <circle id="pomo-ring" cx="110" cy="110" r="100" fill="none" stroke="#ef4444" stroke-width="10" stroke-dasharray="628" stroke-dashoffset="0" stroke-linecap="round" style="transform-origin: center; transform: rotate(-90deg); transition: stroke-dashoffset 1s linear;"></circle>
+                </svg>
+                <div id="pomo-main-display" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-size:3.5rem; color:#ef4444; font-variant-numeric:tabular-nums; font-weight:bold;">25:00</div>
+            </div>
+
+            <div style="display: flex; gap: 5px; margin-bottom: 20px;">
+                <button class="btn btn-outline" style="flex:1; padding:8px; font-size:0.9rem;" onclick="setPomodoro(25)">25m Focus</button>
+                <button class="btn btn-outline" style="flex:1; padding:8px; font-size:0.9rem;" onclick="setPomodoro(5)">5m Break</button>
+            </div>
+            <div style="display:flex; gap: 10px;">
+                <button id="pomo-btn" class="btn btn-primary" style="flex: 2; background:#ef4444; border-color:#ef4444;" onclick="startPomodoro()">Start</button>
+                <button class="btn btn-outline" style="flex: 1; color:var(--text-main); border-color:var(--border);" onclick="resetPomodoro()"><i class="fas fa-undo"></i> Reset</button>
             </div>
         </div>
     </div>
 
-    <!-- 6. Base64 Modal -->
-    <div class="tool-modal" id="base64-modal">
-        <div class="tool-modal-content" style="max-width: 600px;">
-            <i class="fas fa-times close-tool-modal" onclick="closeToolModal('base64-modal')"></i>
-            <h2 style="margin-bottom:20px; color: var(--text-main);"><i class="fas fa-arrows-rotate"></i> Base64 Encoder / Decoder</h2>
+    <!-- 6. Subnet Calculator Modal -->
+    <div class="tool-modal" id="subnet-modal">
+        <div class="tool-modal-content" style="max-width: 500px;">
+            <i class="fas fa-times close-tool-modal" onclick="closeToolModal('subnet-modal')"></i>
+            <h2 style="margin-bottom:20px; color: var(--text-main);"><i class="fas fa-network-wired" style="color:#8b5cf6;"></i> Subnet Calculator</h2>
             
-            <div style="text-align:left;">
-                <label style="color:var(--text-muted); font-size:0.9rem; display:block; margin-bottom:5px;">Input Text / Base64 Data:</label>
-                <textarea id="base64-input" class="tool-input" rows="5" style="font-family: monospace; resize:vertical; background:var(--bg-color);" placeholder="Type or paste text here..."></textarea>
-                
-                <div style="display:flex; gap:10px; margin-bottom: 15px;">
-                    <button class="btn btn-primary" style="flex:1;" onclick="processBase64('encode')">Encode to Base64</button>
-                    <button class="btn btn-primary" style="flex:1; background:var(--bg-color); color:var(--text-main); border-color:var(--border);" onclick="processBase64('decode')">Decode from Base64</button>
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <div style="flex:3; text-align:left;">
+                    <label style="color:var(--text-muted); font-size:0.9rem;">IP Address:</label>
+                    <input type="text" id="subnet-ip" class="tool-input" style="font-family:monospace;" placeholder="192.168.1.1" onkeypress="if(event.key==='Enter') calculateSubnet()">
                 </div>
-                
-                <div id="base64-error" style="color: #ef4444; margin-bottom:10px; display:none; font-size: 0.9em; font-weight:600;"></div>
-                
-                <label style="color:var(--text-muted); font-size:0.9rem; display:block; margin-bottom:5px;">Result:</label>
-                <textarea id="base64-output" class="tool-input" rows="5" style="font-family: monospace; resize:vertical; background:var(--bg-color);" readonly placeholder='Result...'></textarea>
-                
-                <button class="btn btn-outline" style="width:100%;" onclick="copyBase64()"><i class="fas fa-copy"></i> Copy Result</button>
+                <div style="flex:1; text-align:left;">
+                    <label style="color:var(--text-muted); font-size:0.9rem;">CIDR:</label>
+                    <select id="subnet-cidr" class="tool-input" style="padding:11px;" onchange="calculateSubnet()">
+                        <!-- dynamically filled in js -->
+                    </select>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="width:100%; margin-bottom:20px; background:#8b5cf6; border-color:#8b5cf6;" onclick="calculateSubnet()">Calculate</button>
+            <div id="subnet-error" style="color: #ef4444; margin-bottom:10px; display:none; font-size: 0.9em; font-weight:600;"></div>
+
+            <div style="text-align:left; background:var(--bg-color); border:1px solid var(--border); border-radius:8px; padding:15px; font-family:monospace; line-height:1.8;">
+                <div><span style="color:var(--text-muted);">Network Address:</span> <strong id="sub-network" style="float:right; color:var(--text-main);">--</strong></div>
+                <div><span style="color:var(--text-muted);">Subnet Mask:</span> <strong id="sub-mask" style="float:right; color:var(--text-main);">--</strong></div>
+                <div><span style="color:var(--text-muted);">First Host:</span> <strong id="sub-first" style="float:right; color:var(--text-main);">--</strong></div>
+                <div><span style="color:var(--text-muted);">Gateway / Usable:</span> <strong id="sub-gateway" style="float:right; color:var(--text-main);">--</strong></div>
+                <div><span style="color:var(--text-muted);">Last Host:</span> <strong id="sub-last" style="float:right; color:var(--text-main);">--</strong></div>
+                <div><span style="color:var(--text-muted);">Broadcast:</span> <strong id="sub-broadcast" style="float:right; color:var(--text-main);">--</strong></div>
+                <hr style="border-color: var(--border); margin:10px 0;">
+                <div><span style="color:var(--text-muted);">Total Usable Hosts:</span> <strong id="sub-hosts" style="float:right; color:#8b5cf6;">--</strong></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. Text Diff Modal -->
+    <div class="tool-modal" id="diff-modal">
+        <div class="tool-modal-content" style="max-width: 800px; width:95%;">
+            <i class="fas fa-times close-tool-modal" onclick="closeToolModal('diff-modal')"></i>
+            <h2 style="margin-bottom:20px; color: var(--text-main);"><i class="fas fa-file-code" style="color:#ec4899;"></i> Text Diff Tool</h2>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
+                <div style="text-align:left;">
+                    <label style="color:var(--text-muted); font-size:0.9rem;">Original Text:</label>
+                    <textarea id="diff-original" class="tool-input" rows="6" style="font-family:monospace; background:var(--bg-color); resize:vertical;"></textarea>
+                </div>
+                <div style="text-align:left;">
+                    <label style="color:var(--text-muted); font-size:0.9rem;">Modified Text:</label>
+                    <textarea id="diff-modified" class="tool-input" rows="6" style="font-family:monospace; background:var(--bg-color); resize:vertical;"></textarea>
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" style="width:100%; margin-bottom:20px; background:#ec4899; border-color:#ec4899;" onclick="runDiff()">Compare Texts</button>
+            <div style="text-align:left;">
+                <label style="color:var(--text-muted); font-size:0.9rem;">Differences:</label>
+                <div id="diff-output" style="background:var(--bg-color); border:1px solid var(--border); border-radius:8px; padding:15px; font-family:monospace; min-height:100px; max-height:250px; overflow-y:auto; white-space:pre-wrap;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8. Unit Converter Modal -->
+    <div class="tool-modal" id="unit-modal">
+        <div class="tool-modal-content" style="max-width: 450px;">
+            <i class="fas fa-times close-tool-modal" onclick="closeToolModal('unit-modal')"></i>
+            <h2 style="margin-bottom:20px; color: var(--text-main);"><i class="fas fa-ruler-combined" style="color:#f97316;"></i> Converter</h2>
+            
+            <div style="display:flex; justify-content:center; gap:10px; margin-bottom:20px;">
+                <button class="btn btn-outline" id="tab-length" style="padding:5px 10px; flex:1;" onclick="switchUnitTab('length')">Length</button>
+                <button class="btn btn-outline" id="tab-weight" style="padding:5px 10px; flex:1;" onclick="switchUnitTab('weight')">Weight</button>
+                <button class="btn btn-outline" id="tab-data" style="padding:5px 10px; flex:1;" onclick="switchUnitTab('data')">Data</button>
+            </div>
+            
+            <div style="display:flex; gap:10px; align-items:center;">
+                <input type="number" id="unit-input-val" class="tool-input" style="flex:2; margin:0;" value="1" oninput="calculateUnit()">
+                <select id="unit-input-type" class="tool-input" style="flex:1; margin:0;" onchange="calculateUnit()"></select>
+            </div>
+            <div style="margin:15px 0; font-size:1.5rem; color:var(--text-muted);"><i class="fas fa-arrow-down"></i></div>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <input type="text" id="unit-output-val" class="tool-input" style="flex:2; margin:0; background:var(--bg-color); font-weight:bold; color:#f97316;" readonly>
+                <select id="unit-output-type" class="tool-input" style="flex:1; margin:0;" onchange="calculateUnit()"></select>
+            </div>
+        </div>
+    </div>
+
+    <!-- 9. Epoch Modal -->
+    <div class="tool-modal" id="epoch-modal">
+        <div class="tool-modal-content" style="max-width: 500px;">
+            <i class="fas fa-times close-tool-modal" onclick="closeToolModal('epoch-modal')"></i>
+            <h2 style="margin-bottom:20px; color: var(--text-main);"><i class="fas fa-hourglass-start" style="color:#14b8a6;"></i> Epoch Converter</h2>
+            
+            <div style="text-align:left; background:var(--bg-color); padding:15px; border-radius:8px; border:1px solid var(--border); margin-bottom:20px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span style="color:var(--text-muted); font-size:0.9rem;">Current Unix Time:</span>
+                    <strong id="live-epoch" style="color:#14b8a6; font-family:monospace; font-size:1.1rem;">Loading...</strong>
+                </div>
+            </div>
+
+            <div style="text-align:left;">
+                <label style="color:var(--text-main); font-weight:600;">Epoch to Date</label>
+                <div style="display:flex; gap:10px; margin-top:5px; margin-bottom:15px;">
+                    <input type="number" id="epoch-input" class="tool-input" style="flex:1; margin:0; font-family:monospace;" placeholder="1700000000" oninput="convertEpoch('to_date')">
+                </div>
+                <div id="epoch-date-output" style="color:var(--text-muted); min-height:24px; font-family:monospace; margin-bottom:20px;">Enter seconds to view date</div>
+                <hr style="border-color:var(--border); margin-bottom:20px;">
+
+                <label style="color:var(--text-main); font-weight:600;">Date to Epoch</label>
+                <div style="display:flex; gap:10px; margin-top:5px; margin-bottom:15px;">
+                    <input type="datetime-local" id="date-input" class="tool-input" style="flex:1; margin:0; font-family:monospace;" oninput="convertEpoch('to_epoch')">
+                </div>
+                <div id="epoch-num-output" style="color:var(--text-muted); min-height:24px; font-family:monospace;">Select date to view seconds</div>
             </div>
         </div>
     </div>

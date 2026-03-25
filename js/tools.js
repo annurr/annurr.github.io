@@ -1,12 +1,11 @@
-/* tools.js - v4.0 Modal UX + Native API Fetch */
+/* tools.js - v5.0 Advanced Client-Side Utilities */
 
-// -- Modals --
+// -- Modals UX --
 function openToolModal(id) {
     const modal = document.getElementById(id);
     if(modal) {
         modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
-        // Add subtle scale entrance
         const content = modal.querySelector('.tool-modal-content');
         if(content) {
             content.style.transform = 'scale(0.9)';
@@ -36,181 +35,144 @@ function closeToolModal(id) {
         }
     }
 }
-
-// Close modals on outside click
 window.addEventListener('click', (e) => {
     if(e.target.classList.contains('tool-modal')) closeToolModal(e.target.id);
 });
 
-// -- Clock & Timezone --
+// -- 1. World Clock (With Time Scrub) --
 let trackedZones = [];
+let isScrubbing = false;
+let scrubMinutes = 0; // 0 to 1439
+let clockPulse;
 
 function initClock() {
-    // Populate IANA datalist
     const dl = document.getElementById('tz-cities');
     if(dl && typeof Intl !== 'undefined') {
         const timezones = Intl.supportedValuesOf('timeZone');
         timezones.forEach(tz => {
+            let offset = '';
+            try {
+                const parts = new Intl.DateTimeFormat('en', { timeZone: tz, timeZoneName: 'shortOffset' }).formatToParts(new Date());
+                const tzPart = parts.find(p => p.type === 'timeZoneName');
+                if(tzPart) offset = tzPart.value;
+            } catch(e) {}
             const opt = document.createElement('option');
             opt.value = tz;
+            opt.innerText = `(${offset}) ${tz}`;
             dl.appendChild(opt);
         });
     }
-
-    setInterval(() => {
-        const now = new Date();
-        const timeStr = now.toLocaleTimeString('en-US', { hour12: true });
-        
-        const elGrid = document.getElementById('digital-time-preview');
-        const elModal = document.getElementById('digital-time');
-        if(elGrid) elGrid.innerText = timeStr;
-        if(elModal) elModal.innerText = timeStr;
-        
-        renderTimezones();
-    }, 1000);
+    clockPulse = setInterval(runClockTick, 1000);
 }
 
-function addTimezone() {
-    const tzStr = document.getElementById('tz-city-select').value;
-    if(!tzStr) return;
+function runClockTick() {
+    if(isScrubbing) return;
+    const now = new Date();
+    updateAllClocks(now);
+}
+
+function updateScrubTime() {
+    const scrubVal = parseInt(document.getElementById('time-scrub').value);
+    isScrubbing = true;
+    scrubMinutes = scrubVal;
     
-    try {
-        new Date().toLocaleTimeString('en-US', { timeZone: tzStr });
-        if(!trackedZones.includes(tzStr)) trackedZones.push(tzStr);
-        document.getElementById('tz-city-select').value = '';
-        renderTimezones();
-    } catch(e) {
-        alert("Invalid Timezone String. Use a valid global format, e.g. 'America/New_York'.");
-    }
+    // Create a mock date representing today but with scrubbed hours/mins
+    const mock = new Date();
+    mock.setHours(Math.floor(scrubMinutes / 60), scrubMinutes % 60, 0, 0);
+    
+    document.getElementById('time-scrub-val').innerText = `${Math.floor(scrubMinutes / 60).toString().padStart(2,'0')}:${(scrubMinutes % 60).toString().padStart(2,'0')} System Time`;
+    updateAllClocks(mock);
 }
 
-function renderTimezones() {
+function resetScrubTime() {
+    isScrubbing = false;
+    document.getElementById('time-scrub').value = (new Date().getHours() * 60) + new Date().getMinutes();
+    document.getElementById('time-scrub-val').innerText = 'Live';
+    runClockTick();
+}
+
+function updateAllClocks(dateObj) {
+    const timeStr = dateObj.toLocaleTimeString('en-US', { hour12: true });
+    
+    // Grid Main
+    const elGrid = document.getElementById('digital-time-preview');
+    if(elGrid && !isScrubbing) elGrid.innerText = timeStr; // Keep grid live always
+    
+    // Modal Main
+    const elModal = document.getElementById('digital-time');
+    if(elModal) elModal.innerText = isScrubbing ? dateObj.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute:'2-digit' }) : timeStr;
+    
+    // Tracked list
     const list = document.getElementById('timezone-list');
     if(!list) return;
     if(trackedZones.length === 0) {
-        list.innerHTML = '<span style="color:var(--text-muted)">No zones added yet. Filter generic names from the list!</span>';
+        list.innerHTML = '<span style="color:var(--text-muted)">No zones added yet!</span>';
         return;
     }
+    
     let html = '';
-    const now = new Date();
     trackedZones.forEach(z => {
-        const time = now.toLocaleTimeString('en-US', { timeZone: z, hour12: true });
+        const time = dateObj.toLocaleTimeString('en-US', { timeZone: z, hour12: true, hour: '2-digit', minute:'2-digit' });
         const nameParts = z.split('/');
         const niceName = nameParts[nameParts.length-1].replace('_',' ');
         html += `<div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                    <span>${niceName} <span style="font-size:0.8rem; color:var(--text-muted);">(${z})</span></span>
+                    <span>${niceName}</span>
                     <strong style="color:var(--accent); font-family:monospace; letter-spacing:1px;">${time}</strong>
                  </div>`;
     });
     list.innerHTML = html;
 }
 
-// -- Pomodoro --
-let pomoInterval;
-let pomoSeconds = 25 * 60;
-let pomoActive = false;
-let currentPomoMode = 25;
-
-function setPomodoro(mins) {
-    clearInterval(pomoInterval);
-    pomoActive = false;
-    currentPomoMode = mins;
-    pomoSeconds = mins * 60;
-    updatePomoDisplay();
-    const btn = document.getElementById('timer-btn');
-    if(btn) {
-        btn.innerText = "Start";
-        btn.className = "btn btn-primary";
+function addTimezone() {
+    const tzStr = document.getElementById('tz-city-select').value;
+    if(!tzStr) return;
+    try {
+        new Date().toLocaleTimeString('en-US', { timeZone: tzStr });
+        if(!trackedZones.includes(tzStr)) trackedZones.push(tzStr);
+        document.getElementById('tz-city-select').value = '';
+        runClockTick(); // instant update
+    } catch(e) {
+        alert("Invalid Timezone Selection.");
     }
 }
 
-function updatePomoDisplay() {
-    const m = Math.floor(pomoSeconds/60).toString().padStart(2, '0');
-    const s = (pomoSeconds%60).toString().padStart(2, '0');
-    const el = document.getElementById('task-timer-display');
-    if(el) el.innerText = `${m}:${s}`;
-}
-
-function startPomodoro() {
-    const btn = document.getElementById('timer-btn');
-    if(pomoActive) {
-        clearInterval(pomoInterval);
-        pomoActive = false;
-        btn.innerText = "Resume";
-        btn.className = "btn btn-primary";
-    } else {
-        pomoActive = true;
-        btn.innerText = "Pause";
-        btn.className = "btn btn-danger";
-        pomoInterval = setInterval(() => {
-            if(pomoSeconds > 0) {
-                pomoSeconds--;
-                updatePomoDisplay();
-            } else {
-                clearInterval(pomoInterval);
-                pomoActive = false;
-                btn.innerText = "Done!";
-                btn.className = "btn btn-primary";
-            }
-        }, 1000);
-    }
-}
-function resetPomodoro() { setPomodoro(currentPomoMode); }
-
-// -- Prayer Times (Aladhan REST API) --
-let prayLat = 23.8103;
-let prayLng = 90.4125;
-let locName = "Dhaka";
+// -- 2. Prayer Times (Aladhan REST API) --
+let prayLat = 23.8103, prayLng = 90.4125, locName = "Dhaka";
 let nextPrayerInterval;
 
 function fetchPrayerTimes() {
     const url = `https://api.aladhan.com/v1/timings?latitude=${prayLat}&longitude=${prayLng}&method=1&school=1`;
-    document.getElementById('next-prayer-time-preview').innerText = 'Syncing...';
-    document.getElementById('next-prayer-time').innerText = 'Syncing...';
-    
-    fetch(url)
-        .then(res => res.json())
-        .then(data => {
-            const t = data.data.timings;
-            // format 24h to 12h natively
-            const f12 = (str) => {
-                const parts = str.split(':');
-                let h = parseInt(parts[0]);
-                const ampm = h >= 12 ? 'PM' : 'AM';
-                h = h % 12 || 12;
-                return `${String(h).padStart(2,'0')}:${parts[1]} ${ampm}`;
-            };
-            
-            document.getElementById('pr-fajr').innerText = f12(t.Fajr);
-            document.getElementById('pr-sunrise').innerText = f12(t.Sunrise);
-            document.getElementById('pr-dhuhr').innerText = f12(t.Dhuhr);
-            document.getElementById('pr-asr').innerText = f12(t.Asr);
-            document.getElementById('pr-maghrib').innerText = f12(t.Maghrib);
-            document.getElementById('pr-isha').innerText = f12(t.Isha);
-            
-            // Hijri Date
-            const d = data.data.date.hijri;
-            document.getElementById('hijri-date').innerText = `${d.day} ${d.month.en} ${d.year} AH`;
+    fetch(url).then(res => res.json()).then(data => {
+        const t = data.data.timings;
+        const f12 = (str) => {
+            const parts = str.split(':');
+            let h = parseInt(parts[0]);
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12 || 12;
+            return `${String(h).padStart(2,'0')}:${parts[1]} ${ampm}`;
+        };
+        document.getElementById('pr-fajr').innerText = f12(t.Fajr);
+        document.getElementById('pr-sunrise').innerText = f12(t.Sunrise);
+        document.getElementById('pr-dhuhr').innerText = f12(t.Dhuhr);
+        document.getElementById('pr-asr').innerText = f12(t.Asr);
+        document.getElementById('pr-maghrib').innerText = f12(t.Maghrib);
+        document.getElementById('pr-isha').innerText = f12(t.Isha);
+        
+        const d = data.data.date.hijri;
+        document.getElementById('hijri-date').innerText = `${d.day} ${d.month.en} ${d.year} AH`;
 
-            // Start countdown loop logic natively
-            if(nextPrayerInterval) clearInterval(nextPrayerInterval);
-            nextPrayerInterval = setInterval(() => calculateNextPrayer(t), 1000);
-            calculateNextPrayer(t);
-        })
-        .catch(e => {
-            document.getElementById('next-prayer-time-preview').innerText = 'API Error';
-            document.getElementById('next-prayer-time').innerText = 'Failed to load';
-        });
+        if(nextPrayerInterval) clearInterval(nextPrayerInterval);
+        nextPrayerInterval = setInterval(() => calculateNextPrayer(t), 1000);
+        calculateNextPrayer(t);
+    }).catch(e => {
+        document.getElementById('next-prayer-time-preview').innerText = 'API Error';
+    });
 }
 
 function calculateNextPrayer(timings) {
     const now = new Date();
     const currentMins = now.getHours() * 60 + now.getMinutes();
-    
-    const getTime = (str) => {
-        const [h,m] = str.split(':');
-        return parseInt(h)*60 + parseInt(m);
-    };
+    const getTime = (str) => parseInt(str.split(':')[0])*60 + parseInt(str.split(':')[1]);
 
     const schedule = [
         {name: 'Fajr', time: getTime(timings.Fajr)},
@@ -222,31 +184,23 @@ function calculateNextPrayer(timings) {
     ];
 
     let next = schedule.find(p => p.time > currentMins);
-    let diffMins = 0;
-    
-    if(next) {
-        diffMins = next.time - currentMins;
-    } else {
-        next = schedule[0]; // Next Day Fajr
-        diffMins = (24*60 - currentMins) + next.time;
-    }
+    let diffMins = next ? next.time - currentMins : (24*60 - currentMins) + schedule[0].time;
+    next = next || schedule[0];
     
     const h = Math.floor(diffMins / 60);
     const m = diffMins % 60;
-    
-    const displayStr = `Starts in ${h}h ${String(m).padStart(2,'0')}m`;
+    const s = `Starts in ${h}h ${String(m).padStart(2,'0')}m`;
     const finalName = next.name === 'Sunrise' ? 'Sunrise' : next.name; 
     
     document.getElementById('next-prayer-name').innerText = finalName;
-    document.getElementById('next-prayer-time').innerText = displayStr;
+    document.getElementById('next-prayer-time').innerText = s;
     document.getElementById('next-prayer-name-preview').innerText = finalName;
-    document.getElementById('next-prayer-time-preview').innerText = displayStr;
+    document.getElementById('next-prayer-time-preview').innerText = s;
 }
 
 function geolocatePrayer() {
     if(navigator.geolocation) {
         document.getElementById('pr-location').innerText = "Locating...";
-        document.getElementById('pr-location-preview').innerText = "Locating...";
         navigator.geolocation.getCurrentPosition((position) => {
             prayLat = position.coords.latitude;
             prayLng = position.coords.longitude;
@@ -254,37 +208,24 @@ function geolocatePrayer() {
             document.getElementById('pr-location').innerText = locName;
             document.getElementById('pr-location-preview').innerText = locName;
             fetchPrayerTimes();
-        }, () => {
-            document.getElementById('pr-location').innerText = "Access Denied";
-            document.getElementById('pr-location-preview').innerText = "Access Denied";
         });
     }
 }
 
-// -- Scientific Calculator (GZ30eee Port + Memory) --
+// -- 3. Scientific Calculator --
 let calcMemory = 0;
 function calcAction(op) {
     let display = document.getElementById('calc-display');
-    if (display.value === "Syntax Error" || display.value === "undefined" || display.value === "NaN") display.value = "";
+    if (["Syntax Error", "undefined", "NaN"].includes(display.value)) display.value = "";
     op = op.toLowerCase();
     
     if (['0','1','2','3','4','5','6','7','8','9','.'].includes(op)) {
-        if(display.value === '0') display.value = op;
-        else display.value += op;
+        display.value = display.value === '0' ? op : display.value + op;
     } 
     else if (op === 'clear') display.value = '0';
-    else if (op === 'backspace') {
-        display.value = display.value.substring(0, display.value.length - 1);
-        if(display.value === "") display.value = "0";
-    }
-    else if (op === '*') display.value += '*';
-    else if (op === '/') display.value += '/';
-    else if (op === '+') display.value += '+';
-    else if (op === '-') display.value += '-';
-    else if (op === 'plusminus') {
-        if (display.value.charAt(0) === "-") display.value = display.value.slice(1);
-        else display.value = "-" + display.value;
-    }
+    else if (op === 'backspace') { display.value = display.value.slice(0, -1) || '0'; }
+    else if (['*','/','+','-'].includes(op)) display.value += op;
+    else if (op === 'plusminus') display.value = display.value.startsWith('-') ? display.value.slice(1) : '-' + display.value;
     else if (op === 'mc') calcMemory = 0;
     else if (op === 'mr') display.value = calcMemory.toString();
     else if (op === 'm+') { try { calcMemory += eval(display.value || 0); } catch(e){} }
@@ -300,38 +241,30 @@ function calcAction(op) {
     else if (op === 'ln') display.value = Math.log(eval(display.value));
     else if (op === 'pow') display.value += "^";
     else if (op === 'factorial') {
-        let number = 1;
         try {
             let val = eval(display.value);
-            if (val === 0) display.value = "1";
-            else if (val < 0) display.value = "undefined";
-            else {
-                for (let i = val; i > 0; i--) number *= i;
-                display.value = number.toString();
-            }
+            if(val === 0) display.value = "1";
+            else if(val < 0) display.value = "undefined";
+            else { let num = 1; for(let i=val; i>0; i--) num*=i; display.value = num.toString(); }
         } catch(e) { display.value = "Syntax Error"; }
     }
 }
 function calcEvaluate() {
-    let display = document.getElementById('calc-display');
+    let d = document.getElementById('calc-display');
     try {
-        if ((display.value).indexOf("^") > -1) {
-            var base = (display.value).slice(0, (display.value).indexOf("^"));
-            var exponent = (display.value).slice((display.value).indexOf("^") + 1);
-            display.value = eval("Math.pow(" + eval(base) + "," + eval(exponent) + ")");
+        if (d.value.includes("^")) {
+            const [base, exp] = d.value.split("^");
+            d.value = Math.pow(eval(base), eval(exp));
         } else {
-            display.value = eval(display.value);
-            if (display.value === undefined || display.value === "NaN" || isNaN(display.value)) throw new Error();
+            d.value = eval(d.value);
+            if (isNaN(d.value)) throw new Error();
         }
-    } catch(e) {
-        display.value = "Syntax Error";
-    }
+    } catch(e) { d.value = "Syntax Error"; }
 }
 document.addEventListener('keydown', (e) => {
-    const calcPane = document.getElementById('calc-modal');
-    if(!calcPane || calcPane.style.display !== 'flex') return;
+    const m = document.getElementById('calc-modal');
+    if(!m || m.style.display !== 'flex') return;
     if(e.target.tagName === 'INPUT' && e.target.id !== 'calc-display') return;
-    
     const key = e.key;
     if(/[0-9.]/.test(key)) calcAction(key);
     else if(key === 'Enter' || key === '=') { e.preventDefault(); calcEvaluate(); }
@@ -341,134 +274,257 @@ document.addEventListener('keydown', (e) => {
 });
 
 
-// -- Password Generator --
+// -- 4. Password Gen with Entropy --
 function generatePassword() {
-    const length = parseInt(document.getElementById('pass-length').value);
-    const hasUpper = document.getElementById('pass-upper').checked;
-    const hasLower = document.getElementById('pass-lower').checked;
-    const hasNum = document.getElementById('pass-num').checked;
-    const hasSym = document.getElementById('pass-sym').checked;
-    
-    const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const lower = "abcdefghijklmnopqrstuvwxyz";
-    const nums = "0123456789";
-    const syms = "!@#$%^&*()_+~`|}{[]:;?><,./-=";
+    const len = parseInt(document.getElementById('pass-length').value);
+    const u = document.getElementById('pass-upper').checked;
+    const l = document.getElementById('pass-lower').checked;
+    const n = document.getElementById('pass-num').checked;
+    const s = document.getElementById('pass-sym').checked;
+    const strict = document.getElementById('pass-strict').checked;
     
     let chars = "";
-    if(hasUpper) chars += upper;
-    if(hasLower) chars += lower;
-    if(hasNum) chars += nums;
-    if(hasSym) chars += syms;
-    if(chars === "") { document.getElementById('pass-lower').checked = true; chars = lower; }
+    if(u) chars += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    if(l) chars += "abcdefghijklmnopqrstuvwxyz";
+    if(n) chars += "0123456789";
+    if(s) chars += "!@#$%^&*()_+~`|}{[]:;?><,./-=";
+    
+    if(chars === "") { document.getElementById('pass-lower').checked = true; chars = "abcdefghijklmnopqrstuvwxyz"; }
     
     let pass = "";
-    const array = new Uint32Array(length);
-    window.crypto.getRandomValues(array);
-    for (let i = 0; i < length; i++) {
-        pass += chars[array[i] % chars.length];
+    const arr = new Uint32Array(len);
+    window.crypto.getRandomValues(arr);
+    for (let i = 0; i < len; i++) pass += chars[arr[i] % chars.length];
+    
+    if(strict && s) {
+        // Ensure no symbol at start/end
+        const noSym = chars.replace(/[!@#$%^&*()_+~`|}{\[\]:;?><,.\/-=]/g, '');
+        if(noSym.length > 0) {
+            if(/[!@#$%^&*()_+~`|}{\[\]:;?><,.\/-=]/.test(pass[0])) pass = noSym[new Uint32Array(1)[0] % noSym.length] + pass.slice(1);
+            if(/[!@#$%^&*()_+~`|}{\[\]:;?><,.\/-=]/.test(pass[len-1])) pass = pass.slice(0,-1) + noSym[new Uint32Array(1)[0] % noSym.length];
+        }
     }
+    
     document.getElementById('gen-password-display').value = pass;
+    updateEntropyMeter();
 }
+
+function updateEntropyMeter() {
+    const pass = document.getElementById('gen-password-display').value;
+    if(pass === "Click Generate" || !pass) return;
+    
+    // Calculate pool size based on chars present
+    let pool = 0;
+    if(/[a-z]/.test(pass)) pool += 26;
+    if(/[A-Z]/.test(pass)) pool += 26;
+    if(/[0-9]/.test(pass)) pool += 10;
+    if(/[^a-zA-Z0-9]/.test(pass)) pool += 30; // approx symbols
+    
+    const entropy = pass.length * Math.log2(pool || 1);
+    
+    const bar = document.getElementById('entropy-bar');
+    const lbl = document.getElementById('entropy-label');
+    let percent = Math.min((entropy / 120) * 100, 100);
+    
+    bar.style.width = percent + '%';
+    if(entropy < 40) { bar.style.background = '#ef4444'; lbl.innerText = 'Weak'; lbl.style.color = '#ef4444'; }
+    else if(entropy < 60) { bar.style.background = '#f59e0b'; lbl.innerText = 'Fair'; lbl.style.color = '#f59e0b'; }
+    else if(entropy < 80) { bar.style.background = '#10b981'; lbl.innerText = 'Good'; lbl.style.color = '#10b981'; }
+    else { bar.style.background = '#8b5cf6'; lbl.innerText = 'Strong'; lbl.style.color = '#8b5cf6'; }
+}
+
 function copyPassword() {
     const el = document.getElementById('gen-password-display');
     if(el.value === "Click Generate" || el.value === "") return;
-    el.select();
-    document.execCommand('copy');
-    const original = el.value;
+    el.select(); document.execCommand('copy');
+    const orig = el.value;
     el.value = "Copied!";
-    setTimeout(() => { if(el.value === "Copied!") el.value = original; }, 1000);
+    setTimeout(() => { if(el.value === "Copied!") el.value = orig; }, 1000);
 }
 
-// -- JSON Formatter --
-function formatJSON(spaces) {
-    const input = document.getElementById('json-input').value;
-    const output = document.getElementById('json-output');
-    const status = document.getElementById('json-status');
-    status.style.color = 'var(--accent)';
+
+// -- 5. Pomodoro Tracker --
+let pomoInterval, pomoSeconds = 25 * 60, pomoActive = false, currentPomoMode = 25;
+const POMO_CIRCUMFERENCE = 628; // 2 * pi * 100
+
+function setPomodoro(mins) {
+    clearInterval(pomoInterval);
+    pomoActive = false;
+    currentPomoMode = mins;
+    pomoSeconds = mins * 60;
+    updatePomoUI();
+    document.getElementById('pomo-btn').innerText = "Start";
+}
+function updatePomoUI() {
+    const m = Math.floor(pomoSeconds/60).toString().padStart(2, '0');
+    const s = (pomoSeconds%60).toString().padStart(2, '0');
+    document.getElementById('pomo-main-display').innerText = `${m}:${s}`;
+    document.getElementById('pomo-preview').innerText = `${m}:${s}`;
     
-    if(!input.trim()) {
-        output.value = '';
-        status.innerText = 'Output:';
+    const total = currentPomoMode * 60;
+    const offset = POMO_CIRCUMFERENCE - (pomoSeconds / total) * POMO_CIRCUMFERENCE;
+    document.getElementById('pomo-ring').style.strokeDashoffset = offset;
+}
+function startPomodoro() {
+    const btn = document.getElementById('pomo-btn');
+    if(pomoActive) {
+        clearInterval(pomoInterval); pomoActive = false;
+        btn.innerText = "Resume";
+    } else {
+        pomoActive = true; btn.innerText = "Pause";
+        pomoInterval = setInterval(() => {
+            if(pomoSeconds > 0) { pomoSeconds--; updatePomoUI(); }
+            else { clearInterval(pomoInterval); pomoActive = false; btn.innerText = "Done!"; }
+        }, 1000);
+    }
+}
+function resetPomodoro() { setPomodoro(currentPomoMode); }
+
+
+// -- 6. Subnet Calculator --
+function initSubnet() {
+    const s = document.getElementById('subnet-cidr');
+    if(!s) return;
+    for(let i=1; i<=32; i++) {
+        let opt = document.createElement('option');
+        opt.value = i; opt.innerText = `/${i}`;
+        if(i===24) opt.selected = true;
+        s.appendChild(opt);
+    }
+}
+function calculateSubnet() {
+    const ipStr = document.getElementById('subnet-ip').value;
+    const cidr = parseInt(document.getElementById('subnet-cidr').value);
+    const errBox = document.getElementById('subnet-error');
+    errBox.style.display = 'none';
+    
+    // reset UI
+    ['network','mask','first','gateway','last','broadcast','hosts'].forEach(id => {
+        document.getElementById(`sub-${id}`).innerText = '--';
+    });
+
+    if(!ipStr.match(/^(\d{1,3}\.){3}\d{1,3}$/)) {
+        if(ipStr !== "") { errBox.innerText = 'Invalid IP Address format.'; errBox.style.display = 'block'; }
         return;
     }
-    
-    try {
-        const parsed = JSON.parse(input);
-        output.value = JSON.stringify(parsed, null, spaces);
-        status.innerText = 'Valid JSON ✓';
-        status.style.color = '#10b981'; // Success Green
-    } catch(e) {
-        output.value = e.toString();
-        status.innerText = 'Invalid JSON ✗';
-        status.style.color = '#ef4444'; // Error Red
+    const parts = ipStr.split('.').map(Number);
+    if(parts.some(n => isNaN(n) || n<0 || n>255)) {
+        errBox.innerText = 'Octets must be 0-255.'; errBox.style.display = 'block'; return;
     }
-}
-
-function minifyJSON() {
-    const input = document.getElementById('json-input').value;
-    const output = document.getElementById('json-output');
-    const status = document.getElementById('json-status');
     
-    if(!input.trim()) return;
-    try {
-        const parsed = JSON.parse(input);
-        output.value = JSON.stringify(parsed);
-        status.innerText = 'Valid JSON (Minified) ✓';
-        status.style.color = '#10b981';
-    } catch(e) {
-        output.value = e.toString();
-        status.innerText = 'Invalid JSON ✗';
-        status.style.color = '#ef4444';
-    }
-}
-
-function copyJSON() {
-    const el = document.getElementById('json-output');
-    if(!el.value) return;
-    el.select();
-    document.execCommand('copy');
+    let ipLong = (parts[0]*16777216) + (parts[1]*65536) + (parts[2]*256) + parts[3];
+    let maskLong = ~((1 << (32 - cidr)) - 1) >>> 0;
+    let netLong = (ipLong & maskLong) >>> 0;
+    let broadLong = (netLong | ~maskLong) >>> 0;
     
-    const status = document.getElementById('json-status');
-    const original = status.innerText;
-    status.innerText = 'Copied to Clipboard!';
-    setTimeout(() => { status.innerText = original; }, 1500);
+    const toIP = (num) => [ (num>>>24)&255, (num>>>16)&255, (num>>>8)&255, num&255 ].join('.');
+    
+    let hosts = Math.pow(2, 32-cidr) - 2;
+    if(hosts < 0) hosts = 0;
+    
+    document.getElementById('sub-network').innerText = toIP(netLong);
+    document.getElementById('sub-mask').innerText = toIP(maskLong);
+    document.getElementById('sub-first').innerText = cidr >= 31 ? 'N/A' : toIP(netLong + 1);
+    document.getElementById('sub-gateway').innerText = cidr >= 31 ? 'N/A' : toIP(netLong + 1); // standard gateway
+    document.getElementById('sub-last').innerText = cidr >= 31 ? 'N/A' : toIP(broadLong - 1);
+    document.getElementById('sub-broadcast').innerText = toIP(broadLong);
+    document.getElementById('sub-hosts').innerText = hosts.toLocaleString();
 }
 
 
-// -- Base64 Encoder / Decoder --
-function processBase64(mode) {
-    const input = document.getElementById('base64-input').value;
-    const output = document.getElementById('base64-output');
-    const errBox = document.getElementById('base64-error');
-    errBox.style.display = 'none';
-    output.value = '';
+// -- 7. Text Diff Tool --
+function runDiff() {
+    const oLines = document.getElementById('diff-original').value.split('\n');
+    const mLines = document.getElementById('diff-modified').value.split('\n');
+    const out = document.getElementById('diff-output');
+    out.innerHTML = '';
     
-    if(!input.trim()) return;
-    
-    try {
-        if(mode === 'encode') {
-            output.value = btoa(unescape(encodeURIComponent(input)));
-        } else if(mode === 'decode') {
-            output.value = decodeURIComponent(escape(atob(input)));
+    const max = Math.max(oLines.length, mLines.length);
+    for(let i=0; i<max; i++) {
+        let o = oLines[i] || "";
+        let m = mLines[i] || "";
+        
+        if(o === m) {
+            out.innerHTML += `<div style="color:var(--text-muted); opacity:0.7;">  ${escapeHTML(o)}</div>`;
+        } else {
+            if(o !== "") out.innerHTML += `<div style="color:#ef4444; background:rgba(239, 68, 68, 0.1); padding-left:5px;">- ${escapeHTML(o)}</div>`;
+            if(m !== "") out.innerHTML += `<div style="color:#10b981; background:rgba(16, 185, 129, 0.1); padding-left:5px;">+ ${escapeHTML(m)}</div>`;
         }
-    } catch(e) {
-        errBox.innerText = 'Error: Invalid string or Base64 data.';
-        errBox.style.display = 'block';
+    }
+}
+function escapeHTML(str) {
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+
+// -- 8. Unit Converter --
+const unitRef = {
+    length: { base: 'meter', units: { 'meter':1, 'kilometer':1000, 'centimeter':0.01, 'millimeter':0.001, 'mile':1609.34, 'yard':0.9144, 'foot':0.3048, 'inch':0.0254 } },
+    weight: { base: 'gram', units: { 'gram':1, 'kilogram':1000, 'milligram':0.001, 'pound':453.592, 'ounce':28.3495, 'ton':1000000 } },
+    data: { base: 'byte', units: { 'byte':1, 'kilobyte':1024, 'megabyte':1048576, 'gigabyte':1073741824, 'terabyte':1099511627776, 'bit':0.125 } }
+};
+let currentUnitTab = 'length';
+
+function switchUnitTab(tab) {
+    currentUnitTab = tab;
+    ['length','weight','data'].forEach(id => {
+        document.getElementById(`tab-${id}`).className = tab === id ? 'btn btn-primary' : 'btn btn-outline';
+    });
+    const s1 = document.getElementById('unit-input-type');
+    const s2 = document.getElementById('unit-output-type');
+    s1.innerHTML = ''; s2.innerHTML = '';
+    
+    Object.keys(unitRef[tab].units).forEach(u => {
+        s1.innerHTML += `<option value="${u}">${u.charAt(0).toUpperCase() + u.slice(1)}</option>`;
+        s2.innerHTML += `<option value="${u}">${u.charAt(0).toUpperCase() + u.slice(1)}</option>`;
+    });
+    // set defaults
+    if(tab==='length') { s1.value='meter'; s2.value='foot'; }
+    if(tab==='weight') { s1.value='kilogram'; s2.value='pound'; }
+    if(tab==='data') { s1.value='gigabyte'; s2.value='megabyte'; }
+    
+    calculateUnit();
+}
+function calculateUnit() {
+    let val = parseFloat(document.getElementById('unit-input-val').value);
+    if(isNaN(val)) val = 0;
+    const t1 = document.getElementById('unit-input-type').value;
+    const t2 = document.getElementById('unit-output-type').value;
+    
+    // convert to base, then to target
+    const obj = unitRef[currentUnitTab].units;
+    const baseVal = val * obj[t1];
+    const finalVal = baseVal / obj[t2];
+    
+    // format to max 6 decimals intelligently
+    document.getElementById('unit-output-val').value = parseFloat(finalVal.toFixed(6));
+}
+
+
+// -- 9. Epoch Converter --
+function initEpoch() {
+    setInterval(() => {
+        const el = document.getElementById('live-epoch');
+        if(el) el.innerText = Math.floor(Date.now() / 1000).toString();
+    }, 1000);
+}
+function convertEpoch(mode) {
+    if(mode === 'to_date') {
+        const val = document.getElementById('epoch-input').value;
+        const out = document.getElementById('epoch-date-output');
+        if(!val) { out.innerText = 'Enter seconds...'; return; }
+        const d = new Date(parseInt(val)*1000);
+        out.innerText = isNaN(d) ? 'Invalid Input' : d.toLocaleString() + ' ' + (Intl.DateTimeFormat().resolvedOptions().timeZone || '');
+    } else {
+        const val = document.getElementById('date-input').value;
+        const out = document.getElementById('epoch-num-output');
+        if(!val) { out.innerText = 'Select date...'; return; }
+        const d = new Date(val);
+        out.innerText = isNaN(d) ? 'Invalid Date' : Math.floor(d.getTime() / 1000).toString() + " seconds";
     }
 }
 
-function copyBase64() {
-    const el = document.getElementById('base64-output');
-    if(!el.value) return;
-    el.select();
-    document.execCommand('copy');
-    
-    const original = el.value;
-    el.value = 'Copied to clipboard!';
-    setTimeout(() => { el.value = original; }, 1000);
-}
-
-// -- Auth Logic --
+// -- Auth Init --
 async function checkSession() {
     try {
         if(window.SupabaseClient) {
@@ -493,26 +549,14 @@ function showLoginModal() {
 function closeLoginModal() { 
     const modal = document.getElementById('auth-modal');
     if(modal) modal.style.display = 'none'; 
-    const err = document.getElementById('login-error');
-    if(err) err.style.display = 'none'; 
-}
-async function executeLogin() {
-    const email = document.getElementById('login-email').value;
-    const pass = document.getElementById('login-pass').value;
-    const errBox = document.getElementById('login-error');
-    if (errBox) errBox.style.display = 'none';
-    const result = await window.SupabaseClient.login(email, pass);
-    if(result.success) { closeLoginModal(); unlockPremium(); }
-    else { 
-        if (errBox) {
-            errBox.innerText = result.error || "Login failed."; 
-            errBox.style.display = 'block'; 
-        }
-    }
 }
 
+// -- Init All --
 document.addEventListener('DOMContentLoaded', () => {
     initClock();
-    fetchPrayerTimes(); 
+    fetchPrayerTimes();
+    initSubnet();
+    switchUnitTab('length');
+    initEpoch();
     checkSession();
 });
