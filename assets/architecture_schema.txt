@@ -15,3 +15,6 @@ The portfolio system operates on a detached, serverless backend.
 - **Dynamic Render DOM:** All administrative dashboards operate dynamically. Switching views (such as the *Audit Logs* or *System Monitor*) actively flushes internal tables and dynamically suppresses unused views to preserve execution memory and prevent phantom "attached" UI nodes.
 
 *Note: For granular schema definitions, exact primary keys, and internal policy rules, please reference the private `.github/architecture_schema.md` within the administrative repository root.*
+
+## 4. Premium Tools Authentication Check
+- **Gated Elements:** The `tools.html` module contains premium utilities physically present in the DOM but locked via CSS overlays (`backdrop-filter`). Unlocking requires an active JWT admin session from the Supabase client, resolving securely entirely on the client-side execution block without triggering full page re-renders.

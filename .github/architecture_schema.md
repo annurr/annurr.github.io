@@ -12,6 +12,7 @@ This project is a dynamic portfolio and blog management system designed to be li
 [ Frontend (GitHub Pages) ]
   |-- index.html : Main portfolio page. Dynamically fetches its text and layout configuration from Supabase.
   |-- blog.html  : Public blog page. Fetches and displays published blog posts from the database.
+  |-- tools.html : Public and premium toolkit. The premium section is gated by active admin JWT check.
   |-- admin.html : Secure dashboard to manage posts, edit homepage config, and view frontend audit logs.
   |-- /assets    : Static files, schemas, and icons.
   |-- /js & /css : Scripts and stylesheets for application logic and UI.

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tools | Md Fahim Annur Rahman</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="images/logo.png" type="image/png">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        .tools-header {
+            padding-top: 120px;
+            padding-bottom: 60px;
+            text-align: center;
+            background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 60%);
+        }
+        /* Custom Tool Classes */
+        .tool-card {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 250px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .tool-card:hover { transform: translateY(-5px); border-color: var(--accent); }
+        .tool-title { font-size: 1.25rem; font-weight: 600; color: var(--accent); margin-bottom: 15px; width: 100%; text-align: center;}
+        
+        /* Time tool */
+        .time-display { font-size: 2.5rem; font-weight: 700; color: var(--text-main); font-variant-numeric: tabular-nums; }
+        .time-zone-calc { display: none; margin-top: 20px; width: 100%; }
+        .tool-card.expanded { grid-column: 1 / -1; min-height: 400px; cursor: default; }
+        .tool-card.expanded .time-zone-calc { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Generic Inputs */
+        .tool-input { width: 100%; padding: 12px; margin-bottom: 15px; background: var(--bg-color); border: 1px solid var(--border); color: var(--text-main); border-radius: 6px; }
+        
+        /* Calc UI */
+        .calc-display { font-size: 2rem; background: var(--bg-color); border-radius: 6px; padding: 10px; width:100%; text-align: right; margin-bottom: 15px; font-family: monospace; }
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; }
+        .calc-btn { background: var(--bg-color); border: 1px solid var(--border); color: var(--text-main); padding: 15px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+        .calc-btn:hover { background: var(--border); }
+        .calc-btn.op { color: var(--accent); }
+        .sci-mode { display: none; }
+        .tool-card.expanded .sci-mode { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px; width: 100%; animation: fadeIn 0.5s ease; }
+
+        /* Premium Section */
+        .premium-container { position: relative; width: 100%; border-radius: 12px; overflow: hidden; margin-top: 40px; padding: 40px 0; border: 1px solid var(--border); background: var(--bg-card); }
+        .premium-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(11, 17, 32, 0.4); backdrop-filter: blur(12px); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; transition: opacity 0.5s ease; }
+        [data-theme="light"] .premium-overlay { background: rgba(255, 255, 255, 0.4); }
+        .premium-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; opacity: 0.5; pointer-events: none; padding: 0 clamp(20px, 5vw, 40px); }
+        
+        .auth-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 2000; justify-content: center; align-items: center; }
+        .auth-modal-content { background: var(--bg-card); width: 100%; max-width: 400px; padding: 40px; border-radius: 12px; border: 1px solid var(--border); position: relative; text-align: center; box-shadow: var(--shadow); }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <a href="index.html#home" style="display: flex; align-items: center;">
+                        <img src="images/logo.png" alt="Annur">
+                    </a>
+                </div>
+                <div class="nav-links">
+                    <a href="index.html#home">Home</a>
+                    <a href="index.html#experience">Experience</a>
+                    <a href="blog.html">Blog</a>
+                    <a href="tools.html" class="active">Tools</a>
+                    <button id="theme-toggle" aria-label="Toggle Dark Mode"><i class="fas fa-moon"></i></button>
+                </div>
+                <div class="hamburger">
+                    <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <div class="tools-header">
+        <div class="container">
+            <h1>Toolkit</h1>
+            <p style="color: var(--text-muted);">A collection of public utilities and premium networking tools.</p>
+        </div>
+    </div>
+
+    <section class="container" style="padding-bottom: 40px;">
+        <h2>General Tools</h2>
+        <div class="skills-grid" id="general-tools-grid">
+            
+            <!-- Box 1: World Clock -->
+            <div class="tool-card" id="tool-clock" onclick="expandTool(this, 'clock')">
+                <div class="tool-title"><i class="fas fa-globe"></i> World Clock</div>
+                <div class="time-display" id="local-time">00:00:00</div>
+                <p style="margin-top:5px; color: var(--text-muted);">Local Time</p>
+                
+                <div class="time-zone-calc" onclick="event.stopPropagation()">
+                    <hr style="border-color: var(--border); margin: 20px 0;">
+                    <h3 style="margin-bottom:15px; font-size: 1.1rem; color: var(--text-main);">Time Zone Converter</h3>
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <input type="number" id="tz-offset" class="tool-input" placeholder="Enter UTC Offset (e.g. -5, 8)" style="margin-bottom:0;">
+                        <button class="btn btn-primary" onclick="calculateTimezone()">Convert</button>
+                    </div>
+                    <div class="time-display" id="tz-result" style="font-size: 2rem; color: var(--accent);">--:--:--</div>
+                </div>
+                <button class="btn btn-outline" style="margin-top: 15px; position:absolute; top:10px; right:10px; padding: 5px 10px; display:none;" id="close-clock" onclick="event.stopPropagation(); collapseTool('tool-clock')"><i class="fas fa-times"></i></button>
+            </div>
+
+            <!-- Box 2: Smart Calculator -->
+            <div class="tool-card" id="tool-calc" onclick="expandTool(this, 'calc')">
+                <div class="tool-title"><i class="fas fa-calculator"></i> Smart Calculator</div>
+                
+                <div class="calc-display" id="calc-display">0</div>
+                
+                <div class="sci-mode" onclick="event.stopPropagation()">
+                    <button class="calc-btn op" onclick="calcAction('sin')">sin</button>
+                    <button class="calc-btn op" onclick="calcAction('cos')">cos</button>
+                    <button class="calc-btn op" onclick="calcAction('tan')">tan</button>
+                    <button class="calc-btn op" onclick="calcAction('log')">log</button>
+                </div>
+                
+                <div class="calc-grid" onclick="event.stopPropagation()">
+                    <button class="calc-btn" onclick="calcAppend('7')">7</button>
+                    <button class="calc-btn" onclick="calcAppend('8')">8</button>
+                    <button class="calc-btn" onclick="calcAppend('9')">9</button>
+                    <button class="calc-btn op" onclick="calcAction('/')">/</button>
+                    
+                    <button class="calc-btn" onclick="calcAppend('4')">4</button>
+                    <button class="calc-btn" onclick="calcAppend('5')">5</button>
+                    <button class="calc-btn" onclick="calcAppend('6')">6</button>
+                    <button class="calc-btn op" onclick="calcAction('*')">×</button>
+                    
+                    <button class="calc-btn" onclick="calcAppend('1')">1</button>
+                    <button class="calc-btn" onclick="calcAppend('2')">2</button>
+                    <button class="calc-btn" onclick="calcAppend('3')">3</button>
+                    <button class="calc-btn op" onclick="calcAction('-')">-</button>
+                    
+                    <button class="calc-btn" onclick="calcAction('clear')">C</button>
+                    <button class="calc-btn" onclick="calcAppend('0')">0</button>
+                    <button class="calc-btn op" onclick="calcEvaluate()">=</button>
+                    <button class="calc-btn op" onclick="calcAction('+')">+</button>
+                </div>
+                <button class="btn btn-outline" style="margin-top: 15px; position:absolute; top:10px; right:10px; padding: 5px 10px; display:none;" id="close-calc" onclick="event.stopPropagation(); collapseTool('tool-calc')"><i class="fas fa-times"></i></button>
+            </div>
+
+            <!-- Box 3: Placeholder -->
+            <div class="tool-card" style="cursor: default;">
+                <div class="tool-title" style="color: var(--text-muted);"><i class="fas fa-tools"></i> More Coming Soon</div>
+                <p style="opacity: 0.7; color: var(--text-muted);">New utilities are currently under development.</p>
+            </div>
+            
+        </div>
+    </section>
+
+    <section class="container" style="padding-bottom: 80px;">
+        <h2 style="margin-top: 2rem;">Premium Tools</h2>
+        
+        <div class="premium-container" id="premium-section">
+            <div class="premium-overlay" id="premium-overlay">
+                <i class="fas fa-lock" style="font-size: 3rem; color: var(--text-main); margin-bottom: 20px;"></i>
+                <h3 style="margin-bottom: 20px; color: var(--text-main);">Admin Exclusive Access</h3>
+                <button class="btn btn-primary" onclick="showLoginModal()">Please Login to Unlock</button>
+            </div>
+            
+            <div class="premium-content">
+                <div class="tool-card" style="cursor: default;">
+                    <div class="tool-title"><i class="fas fa-network-wired"></i> Subnet Calculator</div>
+                    <p style="color: var(--text-muted);">Advanced VLSM and CIDR logic arrays.</p>
+                </div>
+                <div class="tool-card" style="cursor: default;">
+                    <div class="tool-title"><i class="fas fa-shield-alt"></i> ACL Generator</div>
+                    <p style="color: var(--text-muted);">Cisco/Juniper standard and extended configurations.</p>
+                </div>
+                <div class="tool-card" style="cursor: default;">
+                    <div class="tool-title"><i class="fas fa-signal"></i> Ping Sweep</div>
+                    <p style="color: var(--text-muted);">ICMP diagnostic sweep templates.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Auth Modal -->
+    <div class="auth-modal" id="auth-modal">
+        <div class="auth-modal-content">
+            <i class="fas fa-times close-modal" style="position:absolute; top:15px; right:15px; cursor:pointer;" onclick="closeLoginModal()"></i>
+            <h2 style="margin-bottom:20px; color: var(--text-main);">Admin Login</h2>
+            <div style="text-align: left;">
+                <label style="display:block; margin-bottom:5px; font-weight:500; color: var(--text-main);">Email</label>
+                <input type="email" id="login-email" class="tool-input" placeholder="admin@example.com">
+                <label style="display:block; margin-bottom:5px; font-weight:500; color: var(--text-main);">Password</label>
+                <input type="password" id="login-pass" class="tool-input" placeholder="••••••••">
+            </div>
+            <div id="login-error" style="color: #ef4444; margin-bottom:15px; display:none; font-size: 0.9em;"></div>
+            <button class="btn btn-primary" style="width:100%;" onclick="executeLogin()">Secure Login</button>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <a href="assets/Annur_Resume.pdf" download class="btn-resume-highlight">
+                    <i class="fas fa-file-arrow-down"></i> Download Resume
+                </a>
+                <p>&copy; 2026 Fahim Annur Rahman. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/supabase-client.js"></script>
+    <script src="js/script.js"></script>
+    <script>
+        // -- Tool Interactivity --
+        function expandTool(element, type) {
+            if(element.classList.contains('expanded')) return;
+            
+            // Collapse others
+            document.querySelectorAll('.tool-card.expanded').forEach(card => collapseTool(card.id));
+            
+            element.classList.add('expanded');
+            if(type === 'clock') document.getElementById('close-clock').style.display = 'block';
+            if(type === 'calc') document.getElementById('close-calc').style.display = 'block';
+        }
+        
+        function collapseTool(id) {
+            const el = document.getElementById(id);
+            if(el) {
+                el.classList.remove('expanded');
+                if(id === 'tool-clock') document.getElementById('close-clock').style.display = 'none';
+                if(id === 'tool-calc') document.getElementById('close-calc').style.display = 'none';
+            }
+        }
+
+        // -- Clock Logic --
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('local-time').innerText = now.toLocaleTimeString('en-US', { hour12: false });
+        }, 1000);
+
+        function calculateTimezone() {
+            const offset = parseFloat(document.getElementById('tz-offset').value);
+            if(isNaN(offset)) return;
+            const now = new Date();
+            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const targetDate = new Date(utc + (3600000 * offset));
+            document.getElementById('tz-result').innerText = targetDate.toLocaleTimeString('en-US', { hour12: false });
+        }
+
+        // -- Calculator Logic --
+        let calcVal = '0';
+        function updateCalcDisplay() { document.getElementById('calc-display').innerText = calcVal; }
+        function calcAppend(num) {
+            if(calcVal === '0' || calcVal === 'Error') calcVal = num;
+            else calcVal += num;
+            updateCalcDisplay();
+        }
+        function calcAction(op) {
+            if(op === 'clear') calcVal = '0';
+            else if(['sin', 'cos', 'tan', 'log'].includes(op)) {
+                try {
+                    const val = parseFloat(calcVal);
+                    if(op === 'sin') calcVal = Math.sin(val).toFixed(4);
+                    if(op === 'cos') calcVal = Math.cos(val).toFixed(4);
+                    if(op === 'tan') calcVal = Math.tan(val).toFixed(4);
+                    if(op === 'log') calcVal = Math.log10(val).toFixed(4);
+                } catch(e) { calcVal = 'Error'; }
+            }
+            else calcVal += op;
+            updateCalcDisplay();
+        }
+        function calcEvaluate() {
+            try { 
+                // Using basic eval for isolated frontend demo. Safe since input is entirely constrained to button presses via UI.
+                calcVal = eval(calcVal).toString(); 
+            } 
+            catch(e) { calcVal = 'Error'; }
+            updateCalcDisplay();
+        }
+
+        // -- Auth Logic --
+        async function checkSession() {
+            try {
+                // Relying on global window.SupabaseClient defined in js/supabase-client.js
+                const session = await window.SupabaseClient.getSession();
+                if(session) {
+                    unlockPremium();
+                }
+            } catch(e) {
+                console.error("Session check failed", e);
+            }
+        }
+
+        function unlockPremium() {
+            const overlay = document.getElementById('premium-overlay');
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 500);
+            document.querySelector('.premium-content').style.opacity = '1';
+            document.querySelector('.premium-content').style.pointerEvents = 'auto';
+        }
+
+        function showLoginModal() {
+            document.getElementById('auth-modal').style.display = 'flex';
+        }
+
+        function closeLoginModal() {
+            document.getElementById('auth-modal').style.display = 'none';
+            document.getElementById('login-error').style.display = 'none';
+        }
+
+        async function executeLogin() {
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-pass').value;
+            const errBox = document.getElementById('login-error');
+            
+            errBox.style.display = 'none';
+            
+            const result = await window.SupabaseClient.login(email, pass);
+            if(result.success) {
+                closeLoginModal();
+                unlockPremium();
+            } else {
+                errBox.innerText = result.error || "Login failed.";
+                errBox.style.display = 'block';
+            }
+        }
+
+        // Run on load
+        document.addEventListener('DOMContentLoaded', checkSession);
+    </script>
+</body>
+</html>
