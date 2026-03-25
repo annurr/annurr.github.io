@@ -238,6 +238,33 @@ const SupabaseClient = {
             console.error("Get audit logs exception:", e);
             return [];
         }
+    },
+
+    // --- SYSTEM LOGS ---
+
+    async getSystemLogs() {
+        try {
+            const { data: ghLogs, error: err1 } = await _supabase
+                .from('github_action_logs')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(50);
+                
+            const { data: hbLogs, error: err2 } = await _supabase
+                .from('heartbeat_logs')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(50);
+
+            if (err1 || err2) {
+                console.error('Error fetching system logs:', err1 || err2);
+                return { ghLogs: [], hbLogs: [] };
+            }
+            return { ghLogs: ghLogs || [], hbLogs: hbLogs || [] };
+        } catch (e) {
+            console.error("Get system logs exception:", e);
+            return { ghLogs: [], hbLogs: [] };
+        }
     }
 };
 

@@ -32,8 +32,22 @@ jobs:
           
           if [ "$HTTP_STATUS" -eq 200 ]; then
             echo -e "\nSuccessfully pinged Supabase! (HTTP 200)"
+            PING_STATUS="success"
+            ERROR_MSG=""
           else
             echo -e "\nFailed to ping Supabase, HTTP status: $HTTP_STATUS"
+            PING_STATUS="failed"
+            ERROR_MSG="HTTP status: $HTTP_STATUS"
+          fi
+          
+          echo "Logging status to github_action_logs..."
+          curl -sS -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/github_action_logs" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"status\": \"$PING_STATUS\", \"error_message\": \"$ERROR_MSG\"}"
+            
+          if [ "$PING_STATUS" = "failed" ]; then
             exit 1
           fi
 

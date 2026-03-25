@@ -401,6 +401,8 @@
 
                     <button onclick="showAuditLogs()" id="btn-tab-audit" class="auth-link" aria-label="Audit Logs"
                         style="display: none;">Audit</button>
+                    <button onclick="showSystemMonitor()" id="btn-tab-monitor" class="auth-link" aria-label="System Monitor"
+                        style="display: none;">Monitor</button>
                     <button onclick="showHomepageMgmt()" id="btn-tab-home" class="auth-link" aria-label="Homepage"
                         style="display: none;">Homepage</button>
                     <button onclick="handleLogout()" class="danger-btn auth-link" aria-label="Logout"
@@ -535,6 +537,29 @@
                 </div>
             </div>
 
+            <!-- SYSTEM MONITOR VIEW -->
+            <div id="system-monitor-view" class="view-section" style="display:none;">
+                <div class="actions-bar">
+                    <div class="filters">
+                        <button onclick="renderSystemLogs()" class="btn-secondary">Refresh</button>
+                    </div>
+                </div>
+                <div class="log-container"
+                    style="max-height: 500px; overflow-y: auto; font-family: monospace; background: #0f172a; padding: 15px; border-radius: 8px;">
+                    <table style="width:100%; font-size: 0.9em;">
+                        <thead>
+                            <tr style="text-align:left; color: var(--accent);">
+                                <th style="padding-bottom:10px;">Time</th>
+                                <th>Source</th>
+                                <th>Status</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="system-list-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- HOMEPAGE MANAGEMENT VIEW -->
             <div id="homepage-mgmt-view" class="view-section" style="display:none;">
                 <p style="color:var(--text-muted); margin-bottom:20px;">Manage sections and content for the
@@ -661,7 +686,7 @@
                 document.getElementById('edit-card-modal').style.display = 'none';
 
                 // Reset Tab Buttons
-                const tabs = ['btn-tab-posts', 'btn-tab-audit', 'btn-tab-home'];
+                const tabs = ['btn-tab-posts', 'btn-tab-audit', 'btn-tab-home', 'btn-tab-monitor'];
                 tabs.forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.classList.remove('active');
@@ -708,6 +733,11 @@
             async function showAuditLogs() {
                 setActiveTab('btn-tab-audit', 'audit-log-view', '<i class="fas fa-clipboard-list"></i> System Audit Logs');
                 await renderAuditLogs();
+            }
+
+            async function showSystemMonitor() {
+                setActiveTab('btn-tab-monitor', 'system-monitor-view', '<i class="fas fa-heartbeat"></i> System Monitor');
+                await renderSystemLogs();
             }
 
 
@@ -1264,6 +1294,62 @@
                     });
                 } catch (e) {
                     console.error("Error rendering logs", e);
+                    tbody.innerHTML = '<tr><td colspan="4" style="color:#ef4444; padding:15px; font-weight:bold;">Error loading logs: ' + e.message + '</td></tr>';
+                }
+            }
+
+            // --- System Monitor ---
+            async function renderSystemLogs() {
+                const tbody = document.getElementById('system-list-body');
+                tbody.innerHTML = '<tr><td colspan="4">Loading system logs...</td></tr>';
+
+                try {
+                    const logsData = await window.SupabaseClient.getSystemLogs();
+                    tbody.innerHTML = '';
+                    
+                    const combinedLogs = [];
+                    logsData.ghLogs.forEach(log => {
+                        combinedLogs.push({
+                            time: new Date(log.created_at),
+                            source: 'GitHub Action',
+                            status: log.status.toUpperCase(),
+                            details: log.error_message || 'Ping successful'
+                        });
+                    });
+                    logsData.hbLogs.forEach(log => {
+                        combinedLogs.push({
+                            time: new Date(log.created_at),
+                            source: 'pg_cron Heartbeat',
+                            status: 'SUCCESS',
+                            details: 'Database alive'
+                        });
+                    });
+                    
+                    combinedLogs.sort((a, b) => b.time - a.time);
+
+                    if (combinedLogs.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px;">No system logs found.</td></tr>';
+                        return;
+                    }
+
+                    combinedLogs.forEach(log => {
+                        const tr = document.createElement('tr');
+                        tr.style.borderBottom = '1px solid #1e293b';
+
+                        let color = '#94a3b8';
+                        if (log.status === 'FAILED') color = '#ef4444';
+                        else if (log.status === 'SUCCESS') color = '#10b981';
+
+                        tr.innerHTML = `
+                                    <td style="padding:8px; width: 180px;">${log.time.toLocaleString()}</td>
+                                    <td style="font-weight:bold;">${log.source}</td>
+                                    <td style="color:${color}; font-weight:bold;">${log.status}</td>
+                                    <td>${log.details}</td>
+                                `;
+                        tbody.appendChild(tr);
+                    });
+                } catch (e) {
+                    console.error("Error rendering system logs", e);
                     tbody.innerHTML = '<tr><td colspan="4" style="color:#ef4444; padding:15px; font-weight:bold;">Error loading logs: ' + e.message + '</td></tr>';
                 }
             }
