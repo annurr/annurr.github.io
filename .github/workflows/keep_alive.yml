@@ -1,0 +1,44 @@
+name: Supabase Keep Alive
+
+on:
+  schedule:
+    # Runs daily at midnight UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Allow manual triggering for testing
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log Start Time and Endpoint
+        run: |
+          echo "Starting Supabase Keep-Alive Ping..."
+          echo "Timestamp: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          echo "Endpoint: ${{ secrets.SUPABASE_URL }}/rest/v1/"
+
+      - name: Send keep-alive ping to Supabase API
+        id: ping
+        run: |
+          echo "Executing curl request..."
+          # Capture HTTP status code, headers, and response body
+          curl -sS -D headers.txt -o response.json -w "%{http_code}" "${{ secrets.SUPABASE_URL }}/rest/v1/" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" > http_code.txt
+          
+          HTTP_STATUS=$(cat http_code.txt)
+          echo "HTTP Status: $HTTP_STATUS"
+          echo "Response Content:"
+          cat response.json
+          
+          if [ "$HTTP_STATUS" -eq 200 ]; then
+            echo -e "\nSuccessfully pinged Supabase! (HTTP 200)"
+          else
+            echo -e "\nFailed to ping Supabase, HTTP status: $HTTP_STATUS"
+            exit 1
+          fi
+
+      - name: Log Error on Failure
+        if: failure()
+        run: |
+          echo "::error::The Supabase heartbeat ping failed!"
+          echo "Please check the Supabase project dashboard to ensure it is active, and verify your SUPABASE_URL and SUPABASE_ANON_KEY in GitHub Secrets."
