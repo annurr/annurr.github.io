@@ -265,7 +265,7 @@
         .btn-primary {
             background: transparent;
             border: 1px solid var(--accent);
-            color: var(--accent);
+            color: var(--accent) !important;
             padding: 8px 16px;
             border-radius: 4px;
             cursor: pointer;
@@ -678,6 +678,10 @@
                 // Hide all views
                 const views = ['list-view', 'editor-view', 'audit-log-view', 'homepage-mgmt-view', 'system-monitor-view'];
                 views.forEach(id => document.getElementById(id).style.display = 'none');
+                
+                // Clear live DOM nodes to prevent attachment
+                if(document.getElementById('audit-list-body')) document.getElementById('audit-list-body').innerHTML = '';
+                if(document.getElementById('system-list-body')) document.getElementById('system-list-body').innerHTML = '';
 
                 // Hide Modals/Forms
                 document.getElementById('confirm-modal').style.display = 'none';
