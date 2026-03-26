@@ -84,8 +84,23 @@ const SupabaseClient = {
 
     // --- HOMEPAGE CONFIGURATION ---
 
-    // Load Homepage Config
     async getHomepageConfig() {
+        try {
+            const cached = sessionStorage.getItem('homepage_config');
+            if (cached) {
+                // Trigger background refresh silent fetch
+                this._fetchAndCacheHomepageConfig();
+                return JSON.parse(cached);
+            }
+            return await this._fetchAndCacheHomepageConfig();
+        } catch (err) {
+            console.error('Unexpected error returning config:', err);
+            return null;
+        }
+    },
+
+    // Internal fetcher for homepage config
+    async _fetchAndCacheHomepageConfig() {
         try {
             const { data, error } = await _supabase
                 .from('homepage_config')
@@ -94,10 +109,12 @@ const SupabaseClient = {
                 .single();
 
             if (error) {
-                // If "PGRST116" error (0 rows), it means no config exists yet. Return null to use default.
                 if (error.code === 'PGRST116') return null;
                 console.error('Error fetching homepage config:', error);
                 return null;
+            }
+            if (data?.config) {
+                sessionStorage.setItem('homepage_config', JSON.stringify(data.config));
             }
             return data?.config;
         } catch (err) {
@@ -114,6 +131,7 @@ const SupabaseClient = {
                 .upsert({ id: 'global_config_v1', config: config, updated_at: new Date() }); // Fixed ID
 
             if (error) throw error;
+            sessionStorage.removeItem('homepage_config'); // Invalidate cache
             await this.logAudit('HOMEPAGE_UPDATE', 'Updated homepage layout and content');
             return true;
         } catch (e) {
@@ -125,6 +143,22 @@ const SupabaseClient = {
     // --- BLOG POSTS ---
 
     async getBlogPosts(includeDeleted = false) {
+        try {
+            const cacheKey = includeDeleted ? 'blog_posts_all' : 'blog_posts_public';
+            const cached = sessionStorage.getItem(cacheKey);
+            if (cached) {
+                // Trigger background silent fetch to update cache silently
+                this._fetchAndCacheBlogPosts(includeDeleted);
+                return JSON.parse(cached);
+            }
+            return await this._fetchAndCacheBlogPosts(includeDeleted);
+        } catch (e) {
+            console.error("Get posts wrapper exception:", e);
+            return [];
+        }
+    },
+
+    async _fetchAndCacheBlogPosts(includeDeleted) {
         try {
             let query = _supabase
                 .from('blog_posts')
@@ -140,6 +174,8 @@ const SupabaseClient = {
                 console.error('Error fetching blogs:', error);
                 return [];
             }
+            const cacheKey = includeDeleted ? 'blog_posts_all' : 'blog_posts_public';
+            sessionStorage.setItem(cacheKey, JSON.stringify(data));
             return data;
         } catch (e) {
             console.error("Get posts exception:", e);
@@ -177,6 +213,8 @@ const SupabaseClient = {
             }
 
             if (result.error) throw result.error;
+            sessionStorage.removeItem('blog_posts_all');
+            sessionStorage.removeItem('blog_posts_public');
             await this.logAudit('POST_SAVE', `Saved blog post: ${post.title}`);
             return true;
         } catch (e) {
@@ -194,6 +232,8 @@ const SupabaseClient = {
                 .eq('id', id);
 
             if (error) throw error;
+            sessionStorage.removeItem('blog_posts_all');
+            sessionStorage.removeItem('blog_posts_public');
             await this.logAudit('POST_DELETE', `Soft deleted post ID: ${id}`);
             return true;
         } catch (e) {

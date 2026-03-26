@@ -214,6 +214,19 @@ function geolocatePrayer() {
 
 // -- 3. Scientific Calculator --
 let calcMemory = 0;
+
+// Safe expression evaluator to replace vulnerable eval()
+function safeEval(expr) {
+    if (typeof expr !== 'string') return Number(expr);
+    expr = String(expr).replace(/\s+/g, '');
+    if (expr === '') return 0;
+    // Strictly allow only numbers and basic math operators
+    if (/^[-+*/.%()0-9]+$/.test(expr)) {
+        return Function(`'use strict'; return (${expr})`)();
+    }
+    throw new Error('Syntax Error');
+}
+
 function calcAction(op) {
     let display = document.getElementById('calc-display');
     if (["Syntax Error", "undefined", "NaN"].includes(display.value)) display.value = "";
@@ -228,21 +241,21 @@ function calcAction(op) {
     else if (op === 'plusminus') display.value = display.value.startsWith('-') ? display.value.slice(1) : '-' + display.value;
     else if (op === 'mc') calcMemory = 0;
     else if (op === 'mr') display.value = calcMemory.toString();
-    else if (op === 'm+') { try { calcMemory += eval(display.value || 0); } catch(e){} }
-    else if (op === 'm-') { try { calcMemory -= eval(display.value || 0); } catch(e){} }
-    else if (op === '%') { try { display.value = (eval(display.value) / 100).toString(); } catch(e){} }
-    else if (op === 'pi') display.value = (eval(display.value || 0) || 1) * Math.PI;
-    else if (op === 'e') display.value = Math.exp(eval(display.value));
-    else if (op === 'sqrt') display.value = Math.sqrt(eval(display.value));
-    else if (op === 'sin') display.value = Math.sin(eval(display.value));
-    else if (op === 'cos') display.value = Math.cos(eval(display.value));
-    else if (op === 'tan') display.value = Math.tan(eval(display.value));
-    else if (op === 'log') display.value = Math.log10(eval(display.value));
-    else if (op === 'ln') display.value = Math.log(eval(display.value));
+    else if (op === 'm+') { try { calcMemory += safeEval(display.value || '0'); } catch(e){} }
+    else if (op === 'm-') { try { calcMemory -= safeEval(display.value || '0'); } catch(e){} }
+    else if (op === '%') { try { display.value = (safeEval(display.value) / 100).toString(); } catch(e){} }
+    else if (op === 'pi') { try { display.value = (safeEval(display.value || '0') || 1) * Math.PI; } catch(e) { display.value = "Syntax Error"; } }
+    else if (op === 'e') { try { display.value = Math.exp(safeEval(display.value)); } catch(e) { display.value = "Syntax Error"; } }
+    else if (op === 'sqrt') { try { display.value = Math.sqrt(safeEval(display.value)); } catch(e) { display.value = "Syntax Error"; } }
+    else if (op === 'sin') { try { display.value = Math.sin(safeEval(display.value)); } catch(e) { display.value = "Syntax Error"; } }
+    else if (op === 'cos') { try { display.value = Math.cos(safeEval(display.value)); } catch(e) { display.value = "Syntax Error"; } }
+    else if (op === 'tan') { try { display.value = Math.tan(safeEval(display.value)); } catch(e) { display.value = "Syntax Error"; } }
+    else if (op === 'log') { try { display.value = Math.log10(safeEval(display.value)); } catch(e) { display.value = "Syntax Error"; } }
+    else if (op === 'ln') { try { display.value = Math.log(safeEval(display.value)); } catch(e) { display.value = "Syntax Error"; } }
     else if (op === 'pow') display.value += "^";
     else if (op === 'factorial') {
         try {
-            let val = eval(display.value);
+            let val = safeEval(display.value);
             if(val === 0) display.value = "1";
             else if(val < 0) display.value = "undefined";
             else { let num = 1; for(let i=val; i>0; i--) num*=i; display.value = num.toString(); }
@@ -252,11 +265,11 @@ function calcAction(op) {
 function calcEvaluate() {
     let d = document.getElementById('calc-display');
     try {
-        if (d.value.includes("^")) {
-            const [base, exp] = d.value.split("^");
-            d.value = Math.pow(eval(base), eval(exp));
+        if (String(d.value).includes("^")) {
+            const [base, exp] = String(d.value).split("^");
+            d.value = Math.pow(safeEval(base), safeEval(exp));
         } else {
-            d.value = eval(d.value);
+            d.value = safeEval(d.value);
             if (isNaN(d.value)) throw new Error();
         }
     } catch(e) { d.value = "Syntax Error"; }
