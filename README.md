@@ -143,8 +143,8 @@ This is a personal portfolio project, but feedback and suggestions are welcome!
 
 ## 📧 Contact
 
-- **Email**: annurrahman@example.com
-- **LinkedIn**: [linkedin.com/in/fahim-annur-rahman](https://linkedin.com/in/fahim-annur-rahman)
+- **Email**: annurece@gmail.com
+- **LinkedIn**: [linkedin.com/in/annurr](https://linkedin.com/in/annurr)
 - **GitHub**: [github.com/annurr](https://github.com/annurr)
 
 ---
