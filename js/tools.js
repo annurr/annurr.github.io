@@ -537,6 +537,8 @@ function convertEpoch(mode) {
     }
 }
 
+let premiumBrowserUrl = 'about:blank';
+
 // -- Auth Init --
 async function checkSession() {
     try {
@@ -546,7 +548,32 @@ async function checkSession() {
         }
     } catch(e) {}
 }
-function unlockPremium() {
+
+async function executeLogin() {
+    const user = document.getElementById('login-email').value.trim();
+    const pass = document.getElementById('login-pass').value;
+    const errBox = document.getElementById('login-error');
+
+    errBox.style.display = 'none';
+
+    if (!user || !pass) {
+        errBox.innerText = "Please enter both email and password.";
+        errBox.style.display = 'block';
+        return;
+    }
+
+    const result = await window.SupabaseClient.login(user, pass);
+
+    if (result.success) {
+        closeLoginModal();
+        unlockPremium();
+    } else {
+        errBox.innerText = result.error || "Wrong username/password.";
+        errBox.style.display = 'block';
+    }
+}
+
+async function unlockPremium() {
     const overlay = document.getElementById('premium-overlay');
     if(overlay) {
         overlay.style.opacity = '0';
@@ -554,7 +581,24 @@ function unlockPremium() {
         document.querySelector('.premium-content').style.opacity = '1';
         document.querySelector('.premium-content').style.pointerEvents = 'auto';
     }
+    
+    // Fetch secure premium url if logged in
+    try {
+        const url = await window.SupabaseClient.fetchSecret('premium_browser_url');
+        if (url) {
+            premiumBrowserUrl = url;
+        }
+    } catch(e) { console.error('Error fetching secret URL'); }
 }
+
+function openRenderApp() {
+    if (premiumBrowserUrl && premiumBrowserUrl !== 'about:blank') {
+        window.open(premiumBrowserUrl, '_blank');
+    } else {
+        alert("Secure URL is not loaded yet or you are not logged in.");
+    }
+}
+
 function showLoginModal() { 
     const modal = document.getElementById('auth-modal');
     if(modal) modal.style.display = 'flex'; 
@@ -562,6 +606,209 @@ function showLoginModal() {
 function closeLoginModal() { 
     const modal = document.getElementById('auth-modal');
     if(modal) modal.style.display = 'none'; 
+}
+
+// ==========================================
+// VIRTUAL MACHINES SUITE (PREMIUM TOOL)
+// ==========================================
+let currentVM = null;
+
+async function fetchWithProgress(url, onProgress, onText) {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    
+    const contentLength = response.headers.get('content-length');
+    let total = 0;
+    if (contentLength) total = parseInt(contentLength, 10);
+    
+    const reader = response.body.getReader();
+    const chunks = [];
+    let loaded = 0;
+
+    if (onText) onText(`Downloading... 0%`);
+
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+        loaded += value.length;
+
+        if (total && onProgress) {
+            const pct = (loaded / total) * 100;
+            onProgress(pct);
+            if (onText) onText(`Downloading... ${Math.round(pct)}%`);
+        } else {
+            const mb = (loaded / (1024 * 1024)).toFixed(2);
+            if (onText) onText(`Downloading... ${mb}MB`);
+        }
+    }
+    
+    return new Blob(chunks);
+}
+
+async function startVM(tierKey) {
+    const session = await window.SupabaseClient.getSession();
+    if (!session) {
+        alert("Unauthorized! Administrator access is required.");
+        return;
+    }
+
+    const configData = await window.SupabaseClient.getHomepageConfig();
+    const vmConfig = configData?.vm_config;
+    if (!vmConfig || !vmConfig.tiers[tierKey]) {
+        alert("Failed to load Virtual Machine hardware configuration dynamically.");
+        return;
+    }
+    
+    const tier = vmConfig.tiers[tierKey];
+    const monitor = document.getElementById('vm-monitor');
+    const overlay = document.getElementById('vm-progress-overlay');
+    const progBar = document.getElementById('vm-progress-bar');
+    const progText = document.getElementById('vm-progress-text');
+    const controls = document.getElementById('vm-controls');
+
+    // Clean up
+    if (currentVM) {
+        currentVM.destroy();
+        currentVM = null;
+    }
+    const oldScreens = monitor.querySelectorAll('.vm-screen');
+    oldScreens.forEach(el => el.remove());
+
+    // Create v86 target
+    const screenContainer = document.createElement('div');
+    screenContainer.className = 'vm-screen';
+    screenContainer.style.width = '100%';
+    screenContainer.style.height = '100%';
+    screenContainer.style.display = 'flex';
+    screenContainer.style.alignItems = 'center';
+    screenContainer.style.justifyContent = 'center';
+    screenContainer.style.overflow = 'hidden';
+    
+    const innerDiv = document.createElement('div');
+    innerDiv.style.whiteSpace = 'pre';
+    innerDiv.style.fontFamily = 'monospace';
+    innerDiv.style.fontSize = '14px';
+    innerDiv.style.lineHeight = '14px';
+    
+    const canvas = document.createElement('canvas');
+    canvas.style.display = 'none';
+    innerDiv.appendChild(canvas);
+    screenContainer.appendChild(innerDiv);
+    monitor.appendChild(screenContainer);
+
+    // Initial View setup
+    controls.style.display = 'none';
+    overlay.style.display = 'flex';
+    progBar.style.width = '0%';
+    progText.innerText = 'Communicating with Cloud Server...';
+
+    try {
+        const bucket = 'system-assets';
+        progText.innerText = `Authorizing resources via Secure Channels...`;
+        
+        const [biosUrl, vgaUrl, isoUrl] = await Promise.all([
+            window.SupabaseClient.getSignedUrl(bucket, vmConfig.bios, 300),
+            window.SupabaseClient.getSignedUrl(bucket, vmConfig.vga_bios, 300),
+            window.SupabaseClient.getSignedUrl(bucket, tier.file, 600)
+        ]);
+        
+        if (!biosUrl || !vgaUrl || !isoUrl) throw new Error("Could not authorize OS Images across Cloud bucket boundary.");
+
+        progText.innerText = `Downloading ${tier.name}... 0%`;
+        const blob = await fetchWithProgress(isoUrl, (pct) => {
+            progBar.style.width = `${pct}%`;
+        }, (txt) => {
+            progText.innerText = txt.replace('Downloading...', `Downloading ${tier.name}...`);
+        });
+
+        const isoBlobUrl = URL.createObjectURL(blob);
+        
+        overlay.style.display = 'none';
+
+        const vgaMem = (tierKey === 't3_sl' || tierKey === 't5_pu') ? 8 * 1024 * 1024 : 2 * 1024 * 1024;
+        
+        const v86config = {
+            wasm_path: "https://copy.sh/v86/build/v86.wasm",
+            memory_size: tier.mem * 1024 * 1024,
+            vga_memory_size: vgaMem,
+            screen_container: innerDiv,
+            bios: { url: biosUrl },
+            vga_bios: { url: vgaUrl },
+            disable_speaker: true, // optimization
+            network_relay_url: "wss://relay.widgetry.org/" // smooth networking
+        };
+
+        if (tier.type === 'iso') {
+            v86config.cdrom = { url: isoBlobUrl };
+        } else {
+            v86config.hda = { url: isoBlobUrl };
+        }
+        
+        v86config.autostart = true;
+        currentVM = new window.V86(v86config);
+
+        controls.style.display = 'flex';
+        const powerOffBtn = document.querySelector('#vm-controls button.btn-primary');
+        const fullscreenBtn = document.getElementById('vm-fullscreen-btn');
+        const bootBtns = document.querySelectorAll('#vm-controls button.btn-outline:not(#vm-fullscreen-btn)');
+        if (powerOffBtn) powerOffBtn.style.display = 'inline-block';
+        if (fullscreenBtn) fullscreenBtn.style.display = 'inline-block';
+        bootBtns.forEach(b => b.style.display = 'none');
+
+    } catch (e) {
+        console.error("VM Exception:", e);
+        if (e.message.includes("Could not authorize OS Images across Cloud bucket boundary")) {
+            sessionStorage.removeItem('homepage_config');
+            alert("Configuration cache refreshed to fix broken paths! Please click the Boot button again.");
+        } else {
+            alert("Fatal runtime exception: " + e.message);
+        }
+        powerOffVM();
+    }
+}
+
+function powerOffVM() {
+    if (currentVM) {
+        currentVM.destroy();
+        currentVM = null;
+    }
+    const monitor = document.getElementById('vm-monitor');
+    if(monitor) {
+        monitor.querySelectorAll('.vm-screen').forEach(el => el.remove());
+    }
+    const overlay = document.getElementById('vm-progress-overlay');
+    if(overlay) overlay.style.display = 'none';
+    
+    const controls = document.getElementById('vm-controls');
+    if(controls) controls.style.display = 'flex';
+    
+    document.querySelectorAll('#vm-controls button.btn-outline:not(#vm-fullscreen-btn)').forEach(b => b.style.display = 'inline-block');
+    const powerOffBtn = document.querySelector('#vm-controls button.btn-primary');
+    if (powerOffBtn) powerOffBtn.style.display = 'none';
+    const fullscreenBtn = document.getElementById('vm-fullscreen-btn');
+    if (fullscreenBtn) fullscreenBtn.style.display = 'none';
+    
+    if (document.fullscreenElement) {
+        document.exitFullscreen().catch(e => console.error(e));
+    }
+}
+
+function toggleVMFullscreen() {
+    const monitor = document.getElementById('vm-monitor');
+    if (!document.fullscreenElement) {
+        if (monitor.requestFullscreen) {
+            monitor.requestFullscreen();
+        } else if (monitor.webkitRequestFullscreen) {
+            monitor.webkitRequestFullscreen();
+        } else if (monitor.msRequestFullscreen) {
+            monitor.msRequestFullscreen();
+        }
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
 }
 
 // -- Init All --

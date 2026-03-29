@@ -83,6 +83,35 @@ const SupabaseClient = {
         return session;
     },
 
+    // Fetch secure settings
+    async fetchSecret(key) {
+        try {
+            const { data, error } = await _supabase
+                .from('admin_secrets')
+                .select('value')
+                .eq('key', key)
+                .single();
+            if (error) throw error;
+            return data.value;
+        } catch (e) {
+            console.error("Fetch Secret Error:", e);
+            return null;
+        }
+    },
+
+    // --- STORAGE ---
+
+    async getSignedUrl(bucket, path, expiry = 60) {
+        try {
+            const { data, error } = await _supabase.storage.from(bucket).createSignedUrl(path, expiry);
+            if (error) throw error;
+            return data.signedUrl;
+        } catch (e) {
+            console.error("Signed URL error:", e);
+            return null;
+        }
+    },
+
     // --- HOMEPAGE CONFIGURATION ---
 
     async getHomepageConfig() {
