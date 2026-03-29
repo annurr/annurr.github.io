@@ -16,6 +16,14 @@
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
+
+  <!-- Tools -->
+  <url>
+    <loc>https://annurr.github.io/tools.html</loc>
+    <lastmod>2026-01-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
   
   <!-- Static sections (accessible via anchors) -->
   <url>

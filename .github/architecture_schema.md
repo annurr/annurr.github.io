@@ -26,7 +26,7 @@ This project is a dynamic portfolio and blog management system designed to be li
 [Frontend: GitHub Pages | Backend: Supabase/PostgreSQL]
 
 ## 1. Tables & RLS Policies
-- `posts` 
+- `blog_posts` 
   - (PK: `id`, cols: `title`, `excerpt`, `content`, `image`, `tags`, `deleted`, `created_at`, `updated_at`)
   - RLS: Public=SELECT, Admin=ALL
 - `homepage_config`

@@ -234,23 +234,24 @@ async function applyHomepageConfig() {
                     if (secConfig.id === 'education') iconClass = 'fas fa-graduation-cap';
                     if (item.company && item.company.includes('School')) iconClass = 'fas fa-school'; // heuristic
 
-                    const descHTML = item.description ? `<div class="t-desc">${window.DOMPurify ? DOMPurify.sanitize(item.description) : item.description}</div>` : '';
+                    const safe = (str) => window.DOMPurify ? DOMPurify.sanitize(String(str || '')) : String(str || '');
+                    const descHTML = item.description ? `<div class="t-desc">${safe(item.description)}</div>` : '';
 
                     card.innerHTML = `
                         <div class="timeline-date">
-                            <span class="d-start">${item.dateStart || ''}</span>
+                            <span class="d-start">${safe(item.dateStart)}</span>
                             <div class="d-divider"></div>
-                            <span class="d-end">${item.dateEnd || ''}</span>
+                            <span class="d-end">${safe(item.dateEnd)}</span>
                         </div>
                         <div class="timeline-icon">
-                            <i class="${iconClass}"></i>
+                            <i class="${safe(iconClass)}"></i>
                         </div>
                         <div class="timeline-content">
                             <div class="card-logo"><i class="fas fa-building"></i></div>
-                            <span class="t-company">${item.company || ''}</span>
-                            <h3 class="t-role">${item.role || ''}</h3>
+                            <span class="t-company">${safe(item.company)}</span>
+                            <h3 class="t-role">${safe(item.role)}</h3>
                             <div class="t-meta">
-                              <span><i class="fas fa-map-marker-alt"></i> ${item.location || ''}</span>
+                              <span><i class="fas fa-map-marker-alt"></i> ${safe(item.location)}</span>
                             </div>
                             ${descHTML}
                         </div>
@@ -265,15 +266,16 @@ async function applyHomepageConfig() {
                 secConfig.items.forEach(item => {
                     const card = document.createElement('div');
                     card.className = 'skill-card';
+                    const safe = (str) => window.DOMPurify ? DOMPurify.sanitize(String(str || '')) : String(str || '');
                     // Tags logic: split by comma if string
                     let tagsHTML = '';
                     if (item.tags) {
                         const tagsList = item.tags.split(',').map(t => t.trim());
-                        tagsList.forEach(t => tagsHTML += `<span class="skill-tag">${t}</span>`);
+                        tagsList.forEach(t => tagsHTML += `<span class="skill-tag">${safe(t)}</span>`);
                     }
 
                     card.innerHTML = `
-                        <h3>${item.category || 'Category'}</h3>
+                        <h3>${safe(item.category || 'Category')}</h3>
                         <div class="skill-tags">
                             ${tagsHTML}
                         </div>

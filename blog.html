@@ -201,13 +201,14 @@
                 posts.forEach(post => {
                     const card = document.createElement('div');
                     card.className = 'blog-card';
+                    const safeAttr = (str) => String(str || '').replace(/"/g, '&quot;');
                     card.innerHTML = `
-                        <img src="${post.image}" alt="${post.title}" class="blog-img" onerror="this.onerror=null; this.src='images/placeholder.svg';">
+                        <img src="${safeAttr(post.image)}" alt="${safeAttr(post.title)}" class="blog-img" onerror="this.onerror=null; this.src='images/placeholder.svg';">
                         <div class="blog-content">
-                            <span class="blog-date">${post.date || new Date(post.created_at).toLocaleDateString()}</span>
+                            <span class="blog-date">${safeAttr(post.date || new Date(post.created_at).toLocaleDateString())}</span>
                             <h3 class="blog-title">${DOMPurify.sanitize(post.title)}</h3>
                             <p class="blog-excerpt">${DOMPurify.sanitize(post.excerpt)}</p>
-                            <button onclick="openPost('${post.id}')" class="read-more" style="background:none; border:none; padding:0; cursor:pointer;">
+                            <button onclick="openPost('${safeAttr(post.id)}')" class="read-more" style="background:none; border:none; padding:0; cursor:pointer;">
                                 Read Article <i class="fas fa-arrow-right"></i>
                             </button>
                         </div>

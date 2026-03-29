@@ -46,9 +46,10 @@ const SupabaseClient = {
     },
 
     // Get Current Session (Safe)
+    // Change Password
     async changePassword(newPassword) {
         try {
-            const { data, error } = await this.client.auth.updateUser({ password: newPassword });
+            const { data, error } = await _supabase.auth.updateUser({ password: newPassword });
             if (error) throw error;
             return { success: true };
         } catch (e) {
