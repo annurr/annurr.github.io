@@ -729,7 +729,7 @@ async function startVM(tierKey) {
         const vgaMem = (tierKey === 't3_sl' || tierKey === 't5_pu') ? 8 * 1024 * 1024 : 2 * 1024 * 1024;
         
         const v86config = {
-            wasm_path: "https://copy.sh/v86/build/v86.wasm",
+            wasm_path: "assets/vms/v86.wasm",
             memory_size: tier.mem * 1024 * 1024,
             vga_memory_size: vgaMem,
             screen_container: innerDiv,
