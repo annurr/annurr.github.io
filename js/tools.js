@@ -699,6 +699,8 @@ async function startVM(tierKey) {
 
     // Initial View setup
     controls.style.display = 'none';
+    const vmStatusReady = document.getElementById('vm-status-ready');
+    if (vmStatusReady) vmStatusReady.style.display = 'none';
     overlay.style.display = 'flex';
     progBar.style.width = '0%';
     progText.innerText = 'Communicating with Cloud Server...';
@@ -707,13 +709,21 @@ async function startVM(tierKey) {
         const bucket = 'system-assets';
         progText.innerText = `Authorizing resources via Secure Channels...`;
         
-        const [biosUrl, vgaUrl, isoUrl] = await Promise.all([
+        const [biosUrl, vgaUrl] = await Promise.all([
             window.SupabaseClient.getSignedUrl(bucket, vmConfig.bios, 300),
-            window.SupabaseClient.getSignedUrl(bucket, vmConfig.vga_bios, 300),
-            window.SupabaseClient.getSignedUrl(bucket, tier.file, 600)
+            window.SupabaseClient.getSignedUrl(bucket, vmConfig.vga_bios, 300)
         ]);
         
-        if (!biosUrl || !vgaUrl || !isoUrl) throw new Error("Could not authorize OS Images across Cloud bucket boundary.");
+        let isoUrl;
+        if (tier.src === 'supabase') {
+            isoUrl = await window.SupabaseClient.getSignedUrl(bucket, tier.path, 600);
+        } else if (tier.src === 'local') {
+            isoUrl = tier.path;
+        } else if (tier.src === 'url') {
+            isoUrl = tier.path;
+        }
+        
+        if (!biosUrl || !vgaUrl || !isoUrl) throw new Error("Could not authorize OS Images.");
 
         progText.innerText = `Downloading ${tier.name}... 0%`;
         const blob = await fetchWithProgress(isoUrl, (pct) => {
@@ -758,7 +768,7 @@ async function startVM(tierKey) {
 
     } catch (e) {
         console.error("VM Exception:", e);
-        if (e.message.includes("Could not authorize OS Images across Cloud bucket boundary")) {
+        if (e.message.includes("Could not authorize OS Images")) {
             sessionStorage.removeItem('homepage_config');
             alert("Configuration cache refreshed to fix broken paths! Please click the Boot button again.");
         } else {
@@ -792,6 +802,8 @@ function powerOffVM() {
     if (document.fullscreenElement) {
         document.exitFullscreen().catch(e => console.error(e));
     }
+    const vmStatusReady = document.getElementById('vm-status-ready');
+    if (vmStatusReady) vmStatusReady.style.display = 'flex';
 }
 
 function toggleVMFullscreen() {
