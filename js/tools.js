@@ -765,6 +765,34 @@ async function startVM(tierKey) {
         v86config.autostart = true;
         currentVM = new window.V86(v86config);
 
+        // Responsive Auto-Scaling logic to intelligently stretch to fit host bounds
+        innerDiv.style.transformOrigin = 'center center';
+        const resizeVM = () => {
+            if (!screenContainer || !innerDiv) return;
+            
+            let tw = 640, th = 400;
+            if (canvas && canvas.style.display !== 'none' && canvas.width) {
+                tw = canvas.width; th = canvas.height;
+            } else if (innerDiv.firstChild && innerDiv.firstChild.offsetWidth) {
+                tw = innerDiv.firstChild.offsetWidth; th = innerDiv.firstChild.offsetHeight;
+            }
+            
+            const sw = screenContainer.clientWidth;
+            const sh = screenContainer.clientHeight;
+            if (tw > 0 && th > 0 && sw > 0 && sh > 0) {
+                const scale = Math.min(sw / tw, sh / th);
+                // Limit extreme upscaling for low-res text mode
+                if(scale > 0 && scale < 10) innerDiv.style.transform = `scale(${scale})`;
+            }
+        };
+
+        // Attach hooks
+        currentVM.add_listener("screen-set-mode", () => setTimeout(resizeVM, 50));
+        currentVM.add_listener("screen-set-size", () => setTimeout(resizeVM, 50));
+        window.addEventListener('resize', resizeVM);
+        const bootPoller = setInterval(resizeVM, 1000);
+        setTimeout(() => clearInterval(bootPoller), 15000);
+
         controls.style.display = 'flex';
         const powerOffBtn = document.querySelector('#vm-controls button.btn-primary');
         const fullscreenBtn = document.getElementById('vm-fullscreen-btn');
