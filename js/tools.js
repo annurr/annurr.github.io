@@ -614,6 +614,18 @@ function closeLoginModal() {
 let currentVM = null;
 
 async function fetchWithProgress(url, onProgress, onText) {
+    // ----------------------------------------------------
+    // Bypass GitHub CORS issues on large files using our Edge Function 
+    // It extracts the final AWS S3 URL from the 302 Redirect natively, which DOES contain CORS headers!
+    if (url.includes('github.com') || url.includes('githubusercontent.com') && !url.includes('objects.githubusercontent.com')) {
+        try {
+            const proxyRes = await fetch(`https://svhwsfzvaotanzbcwcez.supabase.co/functions/v1/github-release-proxy?url=${encodeURIComponent(url)}`);
+            const proxyData = await proxyRes.json();
+            if (proxyData.url) url = proxyData.url;
+        } catch(e) { console.error("Edge Proxy Failed:", e); }
+    }
+    // ----------------------------------------------------
+
     const response = await fetch(url);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     
