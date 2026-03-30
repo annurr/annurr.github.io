@@ -614,6 +614,10 @@ function closeLoginModal() {
 let currentVM = null;
 
 async function fetchWithProgress(url, onProgress, onText) {
+    // Auto proxy GitHub downloads to bypass CORS restrictions
+    if (url.includes('github.com') && !url.includes('corsproxy.io')) {
+        url = 'https://corsproxy.io/?' + encodeURIComponent(url);
+    }
     const response = await fetch(url);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     
