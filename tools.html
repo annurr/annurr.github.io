@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdnjs.cloudflare.com https://copy.sh blob:; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https: blob:; connect-src 'self' https://svhwsfzvaotanzbcwcez.supabase.co https://api.aladhan.com https://copy.sh wss://relay.widgetry.org https://distro.ibiblio.org https://github.com https://objects.githubusercontent.com https://release-assets.githubusercontent.com blob:;">
+        content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdnjs.cloudflare.com https://copy.sh blob:; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https: blob:; connect-src 'self' https://svhwsfzvaotanzbcwcez.supabase.co https://api.aladhan.com https://copy.sh wss://relay.widgetry.org https://distro.ibiblio.org https://release-assets.githubusercontent.com blob:;">
     <title>Tools | Md Fahim Annur Rahman</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -763,10 +763,10 @@
             <h2 style="margin-bottom:20px; color: var(--text-main);">Admin Login</h2>
             <div style="text-align: left;">
                 <label style="display:block; margin-bottom:5px; font-weight:500; color: var(--text-main);">Email</label>
-                <input type="email" id="login-email" class="tool-input" placeholder="admin@example.com">
+                <input type="email" id="login-email" class="tool-input" placeholder="admin@example.com" onkeypress="if(event.key==='Enter') executeLogin()">
                 <label
                     style="display:block; margin-bottom:5px; font-weight:500; color: var(--text-main);">Password</label>
-                <input type="password" id="login-pass" class="tool-input" placeholder="••••••••">
+                <input type="password" id="login-pass" class="tool-input" placeholder="••••••••" onkeypress="if(event.key==='Enter') executeLogin()">
             </div>
             <div id="login-error" style="color: #ef4444; margin-bottom:15px; display:none; font-size: 0.9em;"></div>
             <button class="btn btn-primary" style="width:100%;" onclick="executeLogin()">Secure Login</button>
