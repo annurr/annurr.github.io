@@ -45,7 +45,7 @@ This project is a dynamic portfolio and blog management system designed to be li
 ## 2. Keep-Alive Workflows
 - **GitHub Action** (`.github/workflows/keep_alive.yml`)
   - cron: `0 0 * * *`
-  - ping: `GET /rest/v1/`
+  - ping: `GET /rest/v1/homepage_config?select=id&limit=1`
   - log: `POST /rest/v1/github_action_logs` (using Anon key).
 - **pg_cron Heartbeat**
   - cron: `0 0 * * *`  

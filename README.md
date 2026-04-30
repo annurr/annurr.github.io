@@ -19,17 +19,19 @@ A modern, dynamic portfolio website showcasing expertise in Network Administrati
 
 ## 📁 Project Structure
 
-```
+```text
 Website/
 ├── index.html          # Main portfolio page
 ├── blog.html           # Blog listing page
+├── tools.html          # Toolkit and utilities page
 ├── admin.html          # Admin dashboard
 ├── css/
 │   └── styles.css      # Global styles
 ├── js/
 │   ├── script.js       # Homepage logic
 │   ├── supabase-client.js    # Supabase integration
-│   └── blog-data.js    # Data adapter layer
+│   ├── blog-data.js    # Data adapter layer
+│   └── tools.js        # Logic for the toolkit page
 ├── images/             # Static assets
 └── assets/             # Additional resources
 ```

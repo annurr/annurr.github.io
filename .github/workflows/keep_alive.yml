@@ -14,14 +14,14 @@ jobs:
         run: |
           echo "Starting Supabase Keep-Alive Ping..."
           echo "Timestamp: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-          echo "Endpoint: ${{ secrets.SUPABASE_URL }}/rest/v1/"
+          echo "Endpoint: ${{ secrets.SUPABASE_URL }}/rest/v1/homepage_config?select=id&limit=1"
 
       - name: Send keep-alive ping to Supabase API
         id: ping
         run: |
           echo "Executing curl request..."
           # Capture HTTP status code, headers, and response body
-          curl -sS -D headers.txt -o response.json -w "%{http_code}" "${{ secrets.SUPABASE_URL }}/rest/v1/" \
+          curl -sS -D headers.txt -o response.json -w "%{http_code}" "${{ secrets.SUPABASE_URL }}/rest/v1/homepage_config?select=id&limit=1" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" > http_code.txt
           
